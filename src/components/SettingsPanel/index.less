@@ -1,0 +1,233 @@
+.egg_settings_panel_wrap {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  transform: translateX(100%);
+  transition: 0.3s ease;
+  left: 0;
+  top: 0;
+  z-index: 9;
+  &.active {
+    transform: translateX(0);
+  }
+  .egg_settings_panel {
+    padding: 1rem 1.5rem;
+    .egg_back_wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 0.01rem solid #eee;
+      .egg_btn {
+        color: #333;
+        font-size: 1.5rem;
+      }
+    }
+    .egg_settings_content {
+      padding: 1rem 0;
+      .egg_settings_version_wrap {
+        padding: 0.5rem 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        .egg_settings_version {
+          color: #999;
+          display: flex;
+          align-items: center;
+          .egg_settings_version_detail {
+            color: #24292f;
+            font-size: 1.6rem;
+            width: 1.6rem;
+            height: 1.6rem;
+            margin-left: 0.4rem;
+          }
+        }
+      }
+      .egg_settings_theme_wrap {
+        padding: 0.5rem 0;
+        .egg_settings_title {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-bottom: 0.5rem;
+          .egg_settings_current_theme {
+            color: #999;
+          }
+        }
+        .egg_settings_theme_colors {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-top: 0.5rem;
+          .egg_settings_theme_color_wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            .egg_settings_theme_color {
+              border-radius: 50%;
+              width: 1.6rem;
+              height: 1.6rem;
+              background: var(--color);
+              color: var(--color);
+            }
+            &:has(.egg_settings_theme_color.active)::after {
+              content: '';
+              position: absolute;
+              bottom: -0.4rem;
+              left: 50%;
+              background: var(--color);
+              width: 1rem;
+              height: 0.4rem;
+              border-radius: 1rem;
+              transform: translate(-50%, 100%);
+            }
+          }
+        }
+      }
+      .egg_settings_read_time_wrap,
+      .egg_settings_watch_time_wrap {
+        padding: 0.5rem 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .egg_settings_read_time_wrap .egg_select,
+      .egg_settings_watch_time_wrap .egg_select {
+        width: 6rem;
+      }
+      .egg_settings_token_wrap {
+        padding: 1rem 2rem 0 2rem;
+        .egg_settings_token_input {
+          outline: none;
+          border: 0.1rem solid #eee;
+          padding: 1rem;
+          background: white;
+          border-radius: 0.2rem;
+          width: 100%;
+          box-sizing: border-box;
+          color: #ccc;
+          &.active {
+            color: #333;
+            &::placeholder {
+              color: #ccc;
+            }
+          }
+        }
+      }
+      .egg_settings_submit_btn_wrap {
+        text-align: right;
+        padding-top: 1rem;
+        display: none;
+        &.active {
+          display: block;
+        }
+        .egg_settings_submit_btn {
+          outline: none;
+          border: 0.1rem solid #eee;
+          padding: 0.5rem 1rem;
+          text-align: center;
+          background: white;
+          border-radius: 0.2rem;
+          &:active {
+            background: #eee;
+          }
+        }
+      }
+      .egg_schedule {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        .egg_schedule_time_wrap {
+          padding: 1rem 2rem;
+          border-bottom: 0.1rem solid #eee;
+          .egg_schedule_time {
+            .egg_schedule_label {
+              padding-bottom: 1rem;
+              user-select: none;
+            }
+            .egg_schedule_time_input_wrap {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              .egg_schedule_add_btn {
+                outline: none;
+                border: 0.1rem solid #eee;
+                padding: 0.5rem 1rem;
+                text-align: center;
+                background: white;
+                border-radius: 0.2rem;
+              }
+              .egg_schedule_add_btn:active {
+                background: #eee;
+              }
+            }
+          }
+        }
+      }
+      .egg_schedule_list {
+        height: 100%;
+        overflow: auto;
+        .egg_schedule_item {
+          display: flex;
+          justify-content: space-between;
+          padding: 0.5rem 1.5rem;
+          font-size: 1.4rem;
+          border-bottom: 0.1rem solid #eee;
+        }
+        &::-webkit-scrollbar {
+          width: 0.4rem;
+          background: white;
+          border-radius: 0.2rem;
+        }
+        &::-webkit-scrollbar-thumb {
+          background: #ccc;
+          border-radius: 0.2rem;
+        }
+        .egg_schedule_detail_time_wrap {
+          display: flex;
+          align-items: center;
+          &.deactive {
+            color: #ccc;
+          }
+          .egg_schedule_detail_icon {
+            padding-right: 0.4rem;
+            display: flex;
+            color: #ccc;
+          }
+        }
+        .egg_schedule_detail_del_wrap .egg_schedule_del_btn {
+          outline: none;
+          padding: 1rem;
+          text-align: center;
+          background: white;
+          border-radius: 0.2rem;
+          font-size: 1.4rem;
+          color: #ccc;
+          &:hover {
+            color: #333;
+          }
+          &:active {
+            color: #eee;
+          }
+        }
+        .egg_schedule_list_none {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          color: #ccc;
+          .egg_icon {
+            font-size: 2.5rem;
+          }
+          .egg_schedule_list_none_text {
+            padding-top: 1rem;
+          }
+        }
+      }
+    }
+  }
+}

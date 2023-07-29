@@ -1,0 +1,42 @@
+.egg_score_panel {
+  position: absolute;
+  right: 0;
+  background: #fffffff2;
+  border-radius: 0.5rem;
+  opacity: 1;
+  width: 10rem;
+  transition: 80ms ease;
+  z-index: 9;
+  box-shadow: 0 0.2rem 0.4rem 0.1rem #ccc;
+  visibility: hidden;
+  opacity: 0;
+  top: 100%;
+  &.active {
+    visibility: visible;
+    opacity: 1;
+    top: calc(100% + 1rem);
+  }
+  .egg_score_title {
+    border-bottom: 0.1rem solid #eee;
+    padding: 0.4rem;
+    display: flex;
+    align-items: center;
+    .egg_icon {
+      font-size: 1.4rem;
+    }
+    .egg_score_title_text {
+      font-weight: bold;
+      padding-left: 0.2rem;
+    }
+  }
+  .egg_score_detail_item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.4rem;
+    span {
+      color: var(--themeColor);
+      font-weight: bold;
+    }
+  }
+}

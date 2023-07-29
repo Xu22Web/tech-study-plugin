@@ -1,0 +1,23 @@
+.egg_hr_wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  color: #ccc;
+  .egg_hr {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: currentColor;
+    height: 0.1rem;
+    width: 30%;
+    &:nth-of-type(1) {
+      left: 0;
+    }
+    &:nth-last-of-type(1) {
+      right: 0;
+    }
+  }
+  .egg_hr_title {
+    font-size: 1.2rem;
+  }
+}

@@ -1,0 +1,32 @@
+.egg_login_item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 0.5rem 0;
+  .egg_login_btn {
+    border-radius: 1rem;
+    transition: 80ms ease;
+    color: white;
+    background: var(--themeColor);
+    padding: 0.8rem 2.4rem;
+    &:active {
+      opacity: 0.8;
+    }
+  }
+  .egg_login_img_wrap {
+    height: 0;
+    border-radius: 1rem;
+    transition: height 80ms ease;
+    overflow: hidden;
+    &.active {
+      padding: 1rem 0.8rem 0.8rem 0.8rem;
+      height: auto;
+      background: white;
+    }
+    .egg_login_img {
+      width: 15rem;
+      height: 15rem;
+    }
+  }
+}

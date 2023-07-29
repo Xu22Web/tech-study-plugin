@@ -1,0 +1,61 @@
+.egg_select {
+  position: relative;
+  .egg_select_input {
+    outline: none;
+    border: 0.1rem solid #eee;
+    padding: 0.5rem;
+    text-align: center;
+    background: #fff;
+    border-radius: 0.2rem;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+    &::placeholder {
+      color: #ccc;
+    }
+  }
+  .egg_select_list {
+    position: absolute;
+    width: 100%;
+    max-height: 12rem;
+    border-radius: 0 0 0.2rem 0.2rem;
+    box-shadow: 0 0.2rem 0.4rem 0.1rem #ccc;
+    background: #fff;
+    transition: 100ms ease;
+    overflow: auto;
+    z-index: 9;
+    opacity: 0;
+    visibility: hidden;
+    &.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    &::-webkit-scrollbar {
+      width: 0.4rem;
+      background: #fff;
+      border-radius: 0.2rem;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 0.2rem;
+    }
+    .egg_select_item {
+      padding: 0.5rem;
+      border-bottom: 0.1rem solid #eee;
+      color: #333;
+      transition: 300ms ease;
+      text-align: center;
+      width: 100%;
+      &.selected {
+        font-weight: bold;
+        background: #f6f6f6;
+      }
+      &.active {
+        background: #eee;
+      }
+      &:hover {
+        background: #eee;
+      }
+    }
+  }
+}

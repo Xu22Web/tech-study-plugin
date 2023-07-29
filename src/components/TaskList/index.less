@@ -1,0 +1,52 @@
+.egg_task_list {
+  .egg_task_item {
+    user-select: none;
+    min-height: 3rem;
+    min-width: 18rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    .egg_label_wrap {
+      flex-grow: 1;
+      padding-right: 0.5rem;
+      .egg_task_title_wrap {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .egg_task_progress_wrap {
+          display: flex;
+          align-items: center;
+          width: 3.5rem;
+          .egg_task_current {
+            color: var(--themeColor);
+          }
+          .egg_task_max {
+            color: #999;
+            font-size: 1.2rem;
+          }
+        }
+      }
+      .egg_progress {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 0.8rem;
+        .egg_track {
+          background: #ccc;
+          height: 0.5rem;
+          border-radius: 1rem;
+          flex: 1 1 auto;
+          overflow: hidden;
+          .egg_bar {
+            height: 0.5rem;
+            background: var(--themeColor);
+            border-radius: 1rem;
+            width: 0;
+            transition: width 0.5s;
+          }
+        }
+      }
+    }
+  }
+}

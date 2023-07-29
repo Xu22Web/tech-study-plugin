@@ -1,0 +1,41 @@
+.egg_switch {
+  margin: 0;
+  outline: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  position: relative;
+  width: 4.2rem;
+  height: 2.2rem;
+  background: #ccc;
+  border-radius: 5rem;
+  transition: background 0.3s;
+  --border-padding: 0.5rem;
+  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset,
+    0.1rem 0 0.1rem -0.1rem #999 inset;
+  &:checked {
+    background: var(--themeColor);
+    &::after {
+      left: calc(100% - var(--border-padding) - 1.4rem);
+    }
+  }
+  &:disabled {
+    opacity: 0.5;
+    background: #ccc;
+    cursor: not-allowed;
+  }
+  &::after {
+    content: '';
+    display: inline-block;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0.2rem #999;
+    transition: left 0.4s;
+    position: absolute;
+    top: calc(50% - (1.4rem / 2));
+    position: absolute;
+    left: var(--border-padding);
+  }
+}

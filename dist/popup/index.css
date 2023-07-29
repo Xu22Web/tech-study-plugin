@@ -1,0 +1,746 @@
+.egg_hr_wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  color: #ccc;
+}
+.egg_hr_wrap .egg_hr {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: currentColor;
+  height: 0.1rem;
+  width: 30%;
+}
+.egg_hr_wrap .egg_hr:nth-of-type(1) {
+  left: 0;
+}
+.egg_hr_wrap .egg_hr:nth-last-of-type(1) {
+  right: 0;
+}
+.egg_hr_wrap .egg_hr_title {
+  font-size: 1.2rem;
+}
+
+.egg_icon {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  vertical-align: top;
+}
+
+.egg_login_item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 0.5rem 0;
+}
+.egg_login_item .egg_login_btn {
+  border-radius: 1rem;
+  transition: 80ms ease;
+  color: white;
+  background: var(--themeColor);
+  padding: 0.8rem 2.4rem;
+}
+.egg_login_item .egg_login_btn:active {
+  opacity: 0.8;
+}
+.egg_login_item .egg_login_img_wrap {
+  height: 0;
+  border-radius: 1rem;
+  transition: height 80ms ease;
+  overflow: hidden;
+}
+.egg_login_item .egg_login_img_wrap.active {
+  padding: 1rem 0.8rem 0.8rem 0.8rem;
+  height: auto;
+  background: white;
+}
+.egg_login_item .egg_login_img_wrap .egg_login_img {
+  width: 15rem;
+  height: 15rem;
+}
+
+.egg_message_item {
+  padding: 0.4rem 0;
+}
+.egg_message_item .egg_message_content {
+  padding: 0.4rem;
+  background: var(--themeColor);
+  font-size: 1.2rem;
+  text-align: center;
+  color: #fff;
+  border-radius: 1rem;
+  overflow-wrap: break-word;
+}
+
+.egg_detail {
+  background: #ccc;
+  color: white;
+  border-radius: 10rem;
+  font-size: 1.2rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-left: 0.4rem;
+  display: inline-block;
+  text-align: center;
+  line-height: 1.6rem;
+}
+
+.egg_switch {
+  margin: 0;
+  outline: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  position: relative;
+  width: 4.2rem;
+  height: 2.2rem;
+  background: #ccc;
+  border-radius: 5rem;
+  transition: background 0.3s;
+  --border-padding: 0.5rem;
+  box-shadow: -0.1rem 0 0.1rem -0.1rem #999 inset, 0.1rem 0 0.1rem -0.1rem #999 inset;
+}
+.egg_switch:checked {
+  background: var(--themeColor);
+}
+.egg_switch:checked::after {
+  left: calc(100% - var(--border-padding) - 1.4rem);
+}
+.egg_switch:disabled {
+  opacity: 0.5;
+  background: #ccc;
+  cursor: not-allowed;
+}
+.egg_switch::after {
+  content: '';
+  display: inline-block;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0.2rem #999;
+  transition: left 0.4s;
+  top: calc(50% - (1.4rem / 2));
+  position: absolute;
+  left: var(--border-padding);
+}
+
+
+.egg_score_panel {
+  position: absolute;
+  right: 0;
+  background: #fffffff2;
+  border-radius: 0.5rem;
+  opacity: 1;
+  width: 10rem;
+  transition: 80ms ease;
+  z-index: 9;
+  box-shadow: 0 0.2rem 0.4rem 0.1rem #ccc;
+  visibility: hidden;
+  opacity: 0;
+  top: 100%;
+}
+.egg_score_panel.active {
+  visibility: visible;
+  opacity: 1;
+  top: calc(100% + 1rem);
+}
+.egg_score_panel .egg_score_title {
+  border-bottom: 0.1rem solid #eee;
+  padding: 0.4rem;
+  display: flex;
+  align-items: center;
+}
+.egg_score_panel .egg_score_title .egg_icon {
+  font-size: 1.4rem;
+}
+.egg_score_panel .egg_score_title .egg_score_title_text {
+  font-weight: bold;
+  padding-left: 0.2rem;
+}
+.egg_score_panel .egg_score_detail_item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.4rem;
+}
+.egg_score_panel .egg_score_detail_item span {
+  color: var(--themeColor);
+  font-weight: bold;
+}
+
+.egg_score_item .egg_scoreinfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 1.2rem;
+}
+.egg_score_item .egg_scoreinfo .egg_total_score span {
+  color: var(--themeColor);
+  font-weight: bold;
+  padding-left: 0.2rem;
+}
+.egg_score_item .egg_scoreinfo .egg_today_score {
+  display: flex;
+  align-items: center;
+  position: relative;
+  font-size: 1.2rem;
+}
+.egg_score_item .egg_scoreinfo .egg_today_score span {
+  color: var(--themeColor);
+  font-weight: bold;
+  padding-left: 0.2rem;
+}
+.egg_score_item .egg_scoreinfo .egg_today_score .egg_icon {
+  color: #999;
+}
+
+.egg_select {
+  position: relative;
+}
+.egg_select .egg_select_input {
+  outline: none;
+  border: 0.1rem solid #eee;
+  padding: 0.5rem;
+  text-align: center;
+  background: #fff;
+  border-radius: 0.2rem;
+  display: inline-block;
+  width: 100%;
+  box-sizing: border-box;
+}
+.egg_select .egg_select_input::placeholder {
+  color: #ccc;
+}
+.egg_select .egg_select_list {
+  position: absolute;
+  width: 100%;
+  max-height: 12rem;
+  border-radius: 0 0 0.2rem 0.2rem;
+  box-shadow: 0 0.2rem 0.4rem 0.1rem #ccc;
+  background: #fff;
+  transition: 100ms ease;
+  overflow: auto;
+  z-index: 9;
+  opacity: 0;
+  visibility: hidden;
+}
+.egg_select .egg_select_list.active {
+  opacity: 1;
+  visibility: visible;
+}
+.egg_select .egg_select_list::-webkit-scrollbar {
+  width: 0.4rem;
+  background: #fff;
+  border-radius: 0.2rem;
+}
+.egg_select .egg_select_list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 0.2rem;
+}
+.egg_select .egg_select_list .egg_select_item {
+  padding: 0.5rem;
+  border-bottom: 0.1rem solid #eee;
+  color: #333;
+  transition: 300ms ease;
+  text-align: center;
+  width: 100%;
+}
+.egg_select .egg_select_list .egg_select_item.selected {
+  font-weight: bold;
+  background: #f6f6f6;
+}
+.egg_select .egg_select_list .egg_select_item.active {
+  background: #eee;
+}
+.egg_select .egg_select_list .egg_select_item:hover {
+  background: #eee;
+}
+
+.egg_time_input {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.egg_time_input .egg_hour_wrap,
+.egg_time_input .egg_minute_wrap {
+  width: 4rem;
+}
+.egg_time_input .egg_separator {
+  padding: 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.egg_settings_panel_wrap {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  transform: translateX(100%);
+  transition: 0.3s ease;
+  left: 0;
+  top: 0;
+  z-index: 9;
+}
+.egg_settings_panel_wrap.active {
+  transform: translateX(0);
+}
+.egg_settings_panel_wrap .egg_settings_panel {
+  padding: 1rem 1.5rem;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_back_wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 0.01rem solid #eee;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_back_wrap .egg_btn {
+  color: #333;
+  font-size: 1.5rem;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content {
+  padding: 1rem 0;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_version_wrap {
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_version_wrap .egg_settings_version {
+  color: #999;
+  display: flex;
+  align-items: center;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_version_wrap .egg_settings_version .egg_settings_version_detail {
+  color: #24292f;
+  font-size: 1.6rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-left: 0.4rem;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_theme_wrap {
+  padding: 0.5rem 0;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_theme_wrap .egg_settings_title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.5rem;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_theme_wrap .egg_settings_title .egg_settings_current_theme {
+  color: #999;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_theme_wrap .egg_settings_theme_colors {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_theme_wrap .egg_settings_theme_colors .egg_settings_theme_color_wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_theme_wrap .egg_settings_theme_colors .egg_settings_theme_color_wrap .egg_settings_theme_color {
+  border-radius: 50%;
+  width: 1.6rem;
+  height: 1.6rem;
+  background: var(--color);
+  color: var(--color);
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_theme_wrap .egg_settings_theme_colors .egg_settings_theme_color_wrap:has(.egg_settings_theme_color.active)::after {
+  content: '';
+  position: absolute;
+  bottom: -0.4rem;
+  left: 50%;
+  background: var(--color);
+  width: 1rem;
+  height: 0.4rem;
+  border-radius: 1rem;
+  transform: translate(-50%, 100%);
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_read_time_wrap,
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_watch_time_wrap {
+  padding: 0.5rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_read_time_wrap .egg_select,
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_watch_time_wrap .egg_select {
+  width: 6rem;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_token_wrap {
+  padding: 1rem 2rem 0 2rem;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_token_wrap .egg_settings_token_input {
+  outline: none;
+  border: 0.1rem solid #eee;
+  padding: 1rem;
+  background: white;
+  border-radius: 0.2rem;
+  width: 100%;
+  box-sizing: border-box;
+  color: #ccc;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_token_wrap .egg_settings_token_input.active {
+  color: #333;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_token_wrap .egg_settings_token_input.active::placeholder {
+  color: #ccc;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_submit_btn_wrap {
+  text-align: right;
+  padding-top: 1rem;
+  display: none;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_submit_btn_wrap.active {
+  display: block;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_submit_btn_wrap .egg_settings_submit_btn {
+  outline: none;
+  border: 0.1rem solid #eee;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  background: white;
+  border-radius: 0.2rem;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_settings_submit_btn_wrap .egg_settings_submit_btn:active {
+  background: #eee;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule .egg_schedule_time_wrap {
+  padding: 1rem 2rem;
+  border-bottom: 0.1rem solid #eee;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule .egg_schedule_time_wrap .egg_schedule_time .egg_schedule_label {
+  padding-bottom: 1rem;
+  user-select: none;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule .egg_schedule_time_wrap .egg_schedule_time .egg_schedule_time_input_wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule .egg_schedule_time_wrap .egg_schedule_time .egg_schedule_time_input_wrap .egg_schedule_add_btn {
+  outline: none;
+  border: 0.1rem solid #eee;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  background: white;
+  border-radius: 0.2rem;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule .egg_schedule_time_wrap .egg_schedule_time .egg_schedule_time_input_wrap .egg_schedule_add_btn:active {
+  background: #eee;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule_list {
+  height: 100%;
+  overflow: auto;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule_list .egg_schedule_item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 1.5rem;
+  font-size: 1.4rem;
+  border-bottom: 0.1rem solid #eee;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule_list::-webkit-scrollbar {
+  width: 0.4rem;
+  background: white;
+  border-radius: 0.2rem;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule_list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 0.2rem;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule_list .egg_schedule_detail_time_wrap {
+  display: flex;
+  align-items: center;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule_list .egg_schedule_detail_time_wrap.deactive {
+  color: #ccc;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule_list .egg_schedule_detail_time_wrap .egg_schedule_detail_icon {
+  padding-right: 0.4rem;
+  display: flex;
+  color: #ccc;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule_list .egg_schedule_detail_del_wrap .egg_schedule_del_btn {
+  outline: none;
+  padding: 1rem;
+  text-align: center;
+  background: white;
+  border-radius: 0.2rem;
+  font-size: 1.4rem;
+  color: #ccc;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule_list .egg_schedule_detail_del_wrap .egg_schedule_del_btn:hover {
+  color: #333;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule_list .egg_schedule_detail_del_wrap .egg_schedule_del_btn:active {
+  color: #eee;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule_list .egg_schedule_list_none {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #ccc;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule_list .egg_schedule_list_none .egg_icon {
+  font-size: 2.5rem;
+}
+.egg_settings_panel_wrap .egg_settings_panel .egg_settings_content .egg_schedule_list .egg_schedule_list_none .egg_schedule_list_none_text {
+  padding-top: 1rem;
+}
+
+.egg_study_item {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+}
+.egg_study_item .egg_study_btn {
+  background: var(--themeColor);
+  padding: 0.8rem 1.8rem;
+  border-radius: 1rem;
+  color: white;
+  transition: 80ms ease;
+  font-size: 1.2rem;
+}
+@keyframes fade {
+  from {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 0.4;
+    background: #ccc;
+  }
+}
+.egg_study_item .egg_study_btn:not(.loading):active {
+  opacity: 0.8;
+}
+.egg_study_item .egg_study_btn.loading {
+  animation: fade 2s ease infinite alternate;
+}
+.egg_study_item .egg_study_btn:disabled {
+  background: #ccc;
+}
+
+
+.egg_task_list .egg_task_item {
+  user-select: none;
+  min-height: 3rem;
+  min-width: 18rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+.egg_task_list .egg_task_item .egg_label_wrap {
+  flex-grow: 1;
+  padding-right: 0.5rem;
+}
+.egg_task_list .egg_task_item .egg_label_wrap .egg_task_title_wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.egg_task_list .egg_task_item .egg_label_wrap .egg_task_title_wrap .egg_task_progress_wrap {
+  display: flex;
+  align-items: center;
+  width: 3.5rem;
+}
+.egg_task_list .egg_task_item .egg_label_wrap .egg_task_title_wrap .egg_task_progress_wrap .egg_task_current {
+  color: var(--themeColor);
+}
+.egg_task_list .egg_task_item .egg_label_wrap .egg_task_title_wrap .egg_task_progress_wrap .egg_task_max {
+  color: #999;
+  font-size: 1.2rem;
+}
+.egg_task_list .egg_task_item .egg_label_wrap .egg_progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.8rem;
+}
+.egg_task_list .egg_task_item .egg_label_wrap .egg_progress .egg_track {
+  background: #ccc;
+  height: 0.5rem;
+  border-radius: 1rem;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+.egg_task_list .egg_task_item .egg_label_wrap .egg_progress .egg_track .egg_bar {
+  height: 0.5rem;
+  background: var(--themeColor);
+  border-radius: 1rem;
+  width: 0;
+  transition: width 0.5s;
+}
+
+.egg_user_item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+.egg_user_item .egg_logout_btn {
+  border-radius: 1rem;
+  transition: 80ms ease;
+  background: #ccc;
+  padding: 0.4rem 1rem;
+  color: #fff;
+  font-size: 1.2rem;
+}
+.egg_user_item .egg_logout_btn:active {
+  opacity: 0.8;
+}
+.egg_user_item .egg_userinfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.egg_user_item .egg_userinfo .egg_avatar {
+  position: relative;
+}
+.egg_user_item .egg_userinfo .egg_avatar .egg_avatar_nick,
+.egg_user_item .egg_userinfo .egg_avatar .egg_avatar_img {
+  height: 4rem;
+  width: 4rem;
+  border-radius: 50%;
+  background: var(--themeColor);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 1.8rem;
+  color: #fff;
+}
+.egg_user_item .egg_userinfo .egg_avatar .egg_status {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  border: 0.1rem solid #fff;
+}
+.egg_user_item .egg_userinfo .egg_avatar .egg_status.active {
+  background: #44cc44;
+}
+.egg_user_item .egg_userinfo .egg_avatar .egg_status.deactive {
+  background: #ff2121;
+}
+.egg_user_item .egg_userinfo .egg_nick {
+  padding: 0 0.5rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 7.5rem;
+}
+
+.egg_panel {
+  --themeColor: #fa3333;
+  padding: 1rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  font-size: 1.4rem;
+  color: #333;
+  height: 100vh;
+}
+.egg_panel .egg_tool_bar_wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+.egg_panel .egg_tool_bar_wrap .egg_indicator_wrap {
+  display: flex;
+  align-items: center;
+}
+.egg_panel .egg_tool_bar_wrap .egg_indicator_wrap .egg_indicator {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: #ccc;
+}
+.egg_panel .egg_tool_bar_wrap .egg_indicator_wrap .egg_indicator.active {
+  background: var(--themeColor);
+}
+.egg_panel .egg_tool_bar_wrap .egg_indicator_wrap .egg_indicator_status {
+  padding-left: 0.4rem;
+  font-size: 1.2rem;
+}
+.egg_panel .egg_tool_bar_wrap .egg_feature_wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.egg_panel .egg_tool_bar_wrap .egg_feature_wrap .egg_btn {
+  color: #333;
+  font-size: 1.5rem;
+}
+.egg_panel .egg_setting_item {
+  min-height: 3rem;
+  min-width: 18rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+.egg_panel .egg_setting_item .egg_label_wrap {
+  flex-grow: 1;
+}
+.egg_panel .egg_back_item {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+.egg_panel .egg_back_item .egg_icon {
+  width: 100%;
+  height: auto;
+  vertical-align: bottom;
+  color: var(--themeColor);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  outline: none;
+  border: none;
+  box-sizing: border-box;
+}
+:root {
+  --scale: 1;
+  font-size: calc(10px * var(--scale));
+}
+button,
+input[type='button'] {
+  font-family: 'Segoe UI', Arial, 'Microsoft Yahei', sans-serif;
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1em;
+}
+input[type='checkbox'] {
+  cursor: pointer;
+}

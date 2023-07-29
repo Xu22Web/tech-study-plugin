@@ -1,0 +1,66 @@
+.egg_panel {
+  --themeColor: #fa3333;
+  padding: 1rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  font-size: 1.4rem;
+  color: #333;
+  height: 100vh;
+  .egg_tool_bar_wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    .egg_indicator_wrap {
+      display: flex;
+      align-items: center;
+      .egg_indicator {
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        background: #ccc;
+        &.active {
+          background: var(--themeColor);
+        }
+      }
+      .egg_indicator_status {
+        padding-left: 0.4rem;
+        font-size: 1.2rem;
+      }
+    }
+    .egg_feature_wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      .egg_btn {
+        color: #333;
+        font-size: 1.5rem;
+      }
+    }
+  }
+  .egg_setting_item {
+    min-height: 3rem;
+    min-width: 18rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+    .egg_label_wrap {
+      flex-grow: 1;
+    }
+  }
+  .egg_back_item {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    .egg_icon {
+      width: 100%;
+      height: auto;
+      vertical-align: bottom;
+      color: var(--themeColor);
+    }
+  }
+}

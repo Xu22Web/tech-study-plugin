@@ -1,0 +1,31 @@
+.egg_study_item {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+  .egg_study_btn {
+    background: var(--themeColor);
+    padding: 0.8rem 1.8rem;
+    border-radius: 1rem;
+    color: white;
+    transition: 80ms ease;
+    font-size: 1.2rem;
+    @keyframes fade {
+      from {
+        opacity: 0.8;
+      }
+      to {
+        opacity: 0.4;
+        background: #ccc;
+      }
+    }
+    &:not(.loading):active {
+      opacity: 0.8;
+    }
+    &.loading {
+      animation: fade 2s ease infinite alternate;
+    }
+    &:disabled {
+      background: #ccc;
+    }
+  }
+}

@@ -1,0 +1,62 @@
+.egg_user_item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  .egg_logout_btn {
+    border-radius: 1rem;
+    transition: 80ms ease;
+    background: #ccc;
+    padding: 0.4rem 1rem;
+    color: #fff;
+    font-size: 1.2rem;
+    &:active {
+      opacity: 0.8;
+    }
+  }
+  .egg_userinfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .egg_avatar {
+      position: relative;
+      .egg_avatar_nick,
+      .egg_avatar_img {
+        height: 4rem;
+        width: 4rem;
+        border-radius: 50%;
+        background: var(--themeColor);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        font-size: 1.8rem;
+        color: #fff;
+      }
+      .egg_status {
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        border: 0.1rem solid #fff;
+        &.active {
+          background: #44cc44;
+        }
+        &.deactive {
+          background: #ff2121;
+        }
+      }
+    }
+    .egg_nick {
+      padding: 0 0.5rem;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      max-width: 7.5rem;
+    }
+  }
+}
