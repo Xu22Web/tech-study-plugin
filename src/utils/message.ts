@@ -117,9 +117,6 @@ function createMessageListeners() {
         listeners.splice(index, 1);
       }
     },
-    fechListenerData<T>(action: string) {
-      return new Promise<T>((resolve) => {});
-    },
   };
 }
 

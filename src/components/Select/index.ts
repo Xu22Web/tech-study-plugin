@@ -149,9 +149,10 @@ function Select<T>({
         },
         selectData.map((v, index) =>
           createElementNode(
-            'div',
+            'button',
             undefined,
             {
+              type: 'button',
               class: watchRef(
                 () => [v.selected, v.active],
                 () =>

@@ -17,7 +17,7 @@ async function generateQRCode() {
         return <string>data.result;
       }
     }
-  } catch (error) {}
+  } catch (e) {}
 }
 
 /**
@@ -45,7 +45,7 @@ async function loginWithQRCode(qrCode: string) {
       const data = await res.json();
       return <{ data: string; code: string; success: boolean }>data;
     }
-  } catch (error) {}
+  } catch (e) {}
 }
 
 /**
@@ -66,7 +66,7 @@ async function getSign() {
         return <string>data.data.sign;
       }
     }
-  } catch (error) {}
+  } catch (e) {}
 }
 
 /**
@@ -88,7 +88,7 @@ async function secureCheck(data: { code: string; state: string }) {
       const data = await res.json();
       return <boolean>data.success;
     }
-  } catch (error) {}
+  } catch (e) {}
   return false;
 }
 

@@ -79,4 +79,4 @@ function isNow({ hour, minute }: { hour: number; minute: number }) {
   return h === hour && min === minute && s === 0;
 }
 
-export { formatDateNum, formatDateTime, isLate, isNow };
+export { formatTime, formatDateNum, formatDateTime, isLate, isNow };

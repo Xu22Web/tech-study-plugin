@@ -6,7 +6,7 @@ import {
 } from '../../api/user';
 import { TaskType } from '../../enum';
 import { delCookie } from '../../utils/cookie';
-import { error, log } from '../../utils/log';
+import { error, log, warn } from '../../utils/log';
 import { checkQRCode, getQRCode, tryLogin } from '../../utils/login';
 import { onMessage, sendMessage } from '../../utils/message';
 import { getNews, getVideos } from '../../utils/readAndWatch';
@@ -30,7 +30,7 @@ function initConnectionListener() {
     } catch (e) {
       error('无法连接扩展!');
     }
-  }, 1000);
+  }, 2000);
   // 连接成功
   onMessage('connecting', async () => {
     log('获取连接成功!');
@@ -168,12 +168,12 @@ function initUserDataListener() {
  * @description 登录监听
  */
 function initLoginListener() {
-  // 取消状态
-  const cancel = { timer: -1 };
+  // 配置
+  const options = { timer: -1, count: 10 };
   // 登录
   onMessage('login', async () => {
     // 取消之前的登录请求
-    clearTimeout(cancel.timer);
+    clearTimeout(options.timer);
     // 提示
     log('刷新登录二维码!');
     // 获取二维码
@@ -182,30 +182,49 @@ function initLoginListener() {
       // 获取二维码
       const { src, code, url } = qrCode;
       // 发送二维码
-      sendMessage('qrcode', { data: src, type: 'runtime' });
+      sendMessage('qrcode', {
+        data: { src, url, revoked: false },
+        type: 'runtime',
+      });
       // 获取验证码
-      const checkCode = await checkQRCode(code, cancel);
+      const res = await checkQRCode(code, options);
       // 验证成功
-      if (checkCode) {
+      if (res.status === 'success') {
+        // 校验码
+        const { data: checkCode } = res;
         // 尝试登录
         const loginRes = await tryLogin(checkCode);
         if (loginRes) {
           // 提示
           log('登录成功!');
           // 登录成功
-          sendMessage('loginSuccess', { data: null, type: 'runtime' });
+          sendMessage('login', { data: true, type: 'runtime' });
           return;
         }
+      }
+      // 二维码失效
+      if (res.status === 'revoked') {
         // 提示
-        log('登录失败!');
+        warn('登录二维码失效!');
+        // 消息
+        sendMessage('qrcode', {
+          data: { src, url, revoked: true },
+          type: 'runtime',
+        });
+        return;
+      }
+      if (res.status === 'timeout') {
+        // 提示
+        log('登录超时!');
         // 登录成功
-        sendMessage('loginFail', { data: null, type: 'runtime' });
+        sendMessage('login', { data: false, type: 'runtime' });
         return;
       }
       // 提示
-      log('登录二维码失效!');
-      // 二维码失效刷新
-      sendMessage('qrcodeRevoked', { data: src, type: 'runtime' });
+      log('登录失败!');
+      // 登录成功
+      sendMessage('login', { data: false, type: 'runtime' });
+      return;
     }
     return;
   });
@@ -219,6 +238,7 @@ function initLoginListener() {
 }
 
 window.addEventListener('load', () => {
+  log('初始化');
   // 初始化连接监听
   initConnectionListener();
 });

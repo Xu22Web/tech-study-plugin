@@ -142,7 +142,7 @@ function createElementNode<T extends keyof HTMLElementTagNameMap>(
     }
   };
   // 取消订阅
-  const unsubscribe = (e: EleMountOptions) => {
+  const unsubscribe = (_e: EleMountOptions) => {
     //懒得写
   };
   // 创建元素前
@@ -271,7 +271,7 @@ function createNSElementNode<T extends keyof SVGElementTagNameMap>(
     }
   };
   // 取消订阅
-  const unsubscribe = (e: EleMountOptions) => {
+  const unsubscribe = (_e: EleMountOptions) => {
     //
   };
   // 创建元素前
@@ -385,7 +385,7 @@ function handleAttribute(
   key: string,
   value: any,
   subscribe?: (e: EleMountOptions) => void,
-  unsubscribe?: (e: EleMountOptions) => void
+  _unsubscribe?: (e: EleMountOptions) => void
 ) {
   // 处理完的key
   const formatKey = key.toLowerCase();
@@ -948,10 +948,24 @@ function createTextNode(text: any, options?: EleEventOptions): Ele<Text> {
  * @param eleOptions
  * @param parent
  */
-function mountElement<T extends HTMLElement | SVGElement | Text | Comment>(
-  eleOptions: Ele<T>,
+async function mountElement<
+  T extends HTMLElement | SVGElement | Text | Comment
+>(
+  eleOptions: Ele<T> | Promise<Ele<T>>,
   parent: Element | null = document.body
 ) {
+  // promise
+  if (eleOptions instanceof Promise) {
+    const { ele, beforeMount, onMounted } = await eleOptions;
+    if (ele && parent) {
+      // 触发挂载前事件
+      beforeMount && beforeMount();
+      parent.appendChild(ele);
+      // 挂在后
+      onMounted && onMounted();
+    }
+    return;
+  }
   const { ele, beforeMount, onMounted } = eleOptions;
   if (ele && parent) {
     // 触发挂载前事件
@@ -1021,8 +1035,10 @@ function createElementBlock(
 export {
   $$,
   $_,
-  createElementBlock, createElementNode,
+  createElementBlock,
+  createElementNode,
   createNSElementNode,
-  createTextNode, Ele, mountElement
+  createTextNode,
+  Ele,
+  mountElement,
 };
-

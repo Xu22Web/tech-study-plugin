@@ -44,7 +44,7 @@ async function getAnswer(question: string) {
         return answers;
       }
     }
-  } catch (error) {}
+  } catch (e) {}
   return [];
 }
 
@@ -77,7 +77,7 @@ async function saveAnswer(question: string, answer: string) {
       const data = await res.json();
       return <object>data;
     }
-  } catch (error) {}
+  } catch (e) {}
 }
 
 export { getAnswer, saveAnswer };

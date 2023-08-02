@@ -33,28 +33,39 @@ async function getQRCode() {
  */
 async function checkQRCode(
   code: string,
-  cancel: { timer: number }
-): Promise<string | undefined> {
+  options: { timer: number; count: number }
+): Promise<
+  | { status: 'success'; data: string }
+  | { status: 'revoked' }
+  | { status: 'timeout' }
+> {
   log('尝试用二维码登录...');
+  // 请求次数
+  options.count--;
   // 二维码登录
   const res = await loginWithQRCode(code);
   if (res) {
     const { data, code, success } = res;
     // 临时登录验证码
     if (success && data) {
-      return data;
+      return { data, status: 'success' };
     }
     // 二维码失效
     if (code === '11019') {
-      return;
+      return { status: 'revoked' };
     }
   }
   return new Promise((resolve) => {
     // 清除之前的定时器
-    clearTimeout(cancel.timer);
+    clearTimeout(options.timer);
+    // 最大登录次数
+    if (!options.count) {
+      resolve({ status: 'timeout' });
+      return;
+    }
     // 设置取消定时
-    cancel.timer = setTimeout(() => {
-      resolve(checkQRCode(code, cancel));
+    options.timer = setTimeout(() => {
+      resolve(checkQRCode(code, options));
     }, 1000);
   });
 }

@@ -1,6 +1,13 @@
 import API_CONFIG from '../config/api';
 /* 推送 API */
 
+interface PushResponse {
+  code: number;
+  msg: string;
+  data: string;
+  count: null;
+}
+
 /**
  * @description 推送
  */
@@ -41,9 +48,9 @@ async function pushPlus(
     // 请求成功
     if (res.ok) {
       const data = await res.json();
-      return data;
+      return <PushResponse>data;
     }
-  } catch (error) {}
+  } catch (e) {}
 }
 
 export { pushPlus };

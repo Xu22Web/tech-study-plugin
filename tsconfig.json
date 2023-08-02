@@ -8,7 +8,9 @@
     "skipLibCheck": true,
     "noImplicitAny": false,
     "moduleResolution": "Node",
-    "removeComments": true
+    "removeComments": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true
   },
   "include": ["**/*.ts"]
 }

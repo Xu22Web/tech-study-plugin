@@ -2,19 +2,15 @@ import PLUGIN_CONFIG from '../../config/plugin';
 import { SettingType } from '../../enum';
 import store from '../../store';
 import { Settings } from '../../types';
-import {
-  Reactive,
-  Ref,
-  reactive,
-  ref,
-  watchEffectRef,
-} from '../../utils/composition';
+import { notification } from '../../utils/chromeUtils';
+import { Reactive, Ref, ref, watchEffectRef } from '../../utils/composition';
 import {
   createElementNode,
   createNSElementNode,
   createTextNode,
 } from '../../utils/element';
-import { debounce, notification } from '../../utils/utils';
+import { setValue } from '../../utils/storage';
+import { debounce } from '../../utils/utils';
 import Icon from '../Icon';
 import Select from '../Select';
 import TimeInput from '../TimeInput';
@@ -81,27 +77,21 @@ function SettingsPanel({
     },
   ];
   // 存储
-  const { maxRead, maxWatch } = store;
-  // token
-  const pushToken = ref('');
-  // token
-  let token = '';
+  const { maxRead, maxWatch, pushToken } = store;
+  // token input
+  const tokenInput = watchEffectRef(() => pushToken.value || null);
   // 小时
   const hour = ref(-1);
   // 分钟
   const minute = ref(-1);
-  // 显示保存
-  const saveShow = ref(false);
-  /**
-   * @description 定时刷新列表
-   */
-  const scheduleList = reactive<
-    {
-      hour: number;
-      minute: number;
-      time: string;
-    }[]
-  >([]);
+  //
+  // const scheduleList = reactive<
+  //   {
+  //     hour: number;
+  //     minute: number;
+  //     time: string;
+  //   }[]
+  // >([]);
   return createElementNode(
     'div',
     undefined,
@@ -241,9 +231,7 @@ function SettingsPanel({
                       if (themeColor.value !== color.value) {
                         themeColor.value = color.value;
                         // 存储
-                        chrome.storage.local.set(
-                          JSON.parse(JSON.stringify({ themeColor }))
-                        );
+                        setValue('themeColor', themeColor);
                         // 通知
                         notification(`主题色已保存为${color.title}`);
                       }
@@ -252,24 +240,7 @@ function SettingsPanel({
                 )
               )
             ),
-          ],
-          {
-            async beforeCreat() {
-              // 获取颜色
-              const { themeColor: themeColorTemp } =
-                await chrome.storage.local.get('themeColor');
-              // 设置主题色
-              themeColorTemp && (themeColor.value = themeColorTemp);
-              // 监听颜色变化
-              chrome.storage.local.onChanged.addListener((changes) => {
-                for (let [key, { newValue }] of Object.entries(changes)) {
-                  if (key === 'themeColor') {
-                    themeColor.value = newValue;
-                  }
-                }
-              });
-            },
-          }
+          ]
         ),
         createElementNode(
           'div',
@@ -310,30 +281,12 @@ function SettingsPanel({
               onchange({ value }) {
                 maxRead.value = value;
                 // 存储
-                chrome.storage.local.set(
-                  JSON.parse(JSON.stringify({ maxRead }))
-                );
+                setValue('maxRead', maxRead);
                 // 通知
                 notification(`最大文章选读时间改为${value}s`);
               },
             }),
-          ],
-          {
-            async beforeCreat() {
-              const { maxRead: maxReadTemp } = await chrome.storage.local.get(
-                'maxRead'
-              );
-              maxReadTemp && (maxRead.value = maxReadTemp);
-              // 监听颜色变化
-              chrome.storage.local.onChanged.addListener((changes) => {
-                for (let [key, { newValue }] of Object.entries(changes)) {
-                  if (key === 'maxRead') {
-                    maxRead.value = newValue;
-                  }
-                }
-              });
-            },
-          }
+          ]
         ),
         createElementNode(
           'div',
@@ -378,30 +331,12 @@ function SettingsPanel({
               onchange({ value }) {
                 maxWatch.value = value;
                 // 存储
-                chrome.storage.local.set(
-                  JSON.parse(JSON.stringify({ maxWatch }))
-                );
+                setValue('maxWatch', maxWatch);
                 // 通知
                 notification(`最大视听学习时间改为${value}s`);
               },
             }),
-          ],
-          {
-            async beforeCreat() {
-              const { maxWatch: maxWatchTemp } = await chrome.storage.local.get(
-                'maxWatch'
-              );
-              maxWatchTemp && (maxWatch.value = maxWatchTemp);
-              // 监听颜色变化
-              chrome.storage.local.onChanged.addListener((changes) => {
-                for (let [key, { newValue }] of Object.entries(changes)) {
-                  if (key === 'maxWatch') {
-                    maxWatch.value = newValue;
-                  }
-                }
-              });
-            },
-          }
+          ]
         ),
         watchEffectRef(() =>
           settings[SettingType.REMOTE_PUSH]
@@ -421,57 +356,65 @@ function SettingsPanel({
                         { class: 'egg_settings_label' },
                         createTextNode('我的 token')
                       ),
-                      createElementNode('input', undefined, {
-                        class: 'egg_settings_token_input',
-                        placeholder: '用户 token',
-                        maxlength: 32,
-                        value: pushToken.value,
-                        onfocus: (e: Event) => {
-                          const input = <HTMLInputElement>e.target;
-                          input.classList.add('active');
-                          saveShow.value = true;
-                        },
-                        onblur: (e: Event) => {
-                          const input = <HTMLInputElement>e.target;
-                          // 去除空格
-                          const value = input.value.trim();
-                          if (/^[0-9a-z]{32}$/.test(value)) {
-                            token = value;
-                            input.value = value;
-                          } else {
-                            token = '';
+                      createElementNode(
+                        'div',
+                        undefined,
+                        { class: 'egg_settings_token_input_wrap' },
+                        createElementNode(
+                          'input',
+                          { value: tokenInput },
+                          {
+                            class: 'egg_settings_token_input',
+                            type: 'text',
+                            placeholder: 'token',
+                            maxlength: 32,
+                            pattern: '^[0-9a-z]{32}$',
+                            required: true,
+                            oninput(e: InputEvent) {
+                              const input = <HTMLInputElement>e.target;
+                              // 绑定输入
+                              tokenInput.value = input.value;
+                            },
+                            onblur() {
+                              // 存在输入
+                              if (tokenInput.value !== null) {
+                                // 格式匹配
+                                const matched = /^[0-9a-z]{32}$/.test(
+                                  tokenInput.value
+                                );
+                                // 满足格式
+                                if (matched) {
+                                  // 存在修改
+                                  if (pushToken.value !== tokenInput.value) {
+                                    // 设置 token
+                                    pushToken.value = tokenInput.value;
+                                    // 本地存储
+                                    setValue('pushToken', pushToken);
+                                    // 通知
+                                    notification('token 保存成功!');
+                                  }
+                                  return;
+                                }
+                                // 重置初始值
+                                if (tokenInput.value === '') {
+                                  pushToken.value = '';
+                                  tokenInput.value = null;
+                                  // 本地存储
+                                  setValue('pushToken', pushToken);
+                                  // 通知
+                                  notification('token 删除成功!');
+                                  return;
+                                }
+                                // 设置正确值
+                                tokenInput.value = pushToken.value;
+                                // 通知
+                                notification('token 有误!');
+                              }
+                            },
                           }
-                          input.classList.remove('active');
-                          setTimeout(() => {
-                            saveShow.value = false;
-                            input.value = pushToken.value;
-                          }, 200);
-                        },
-                      }),
-                    ]
-                  ),
-                  createElementNode(
-                    'div',
-                    undefined,
-                    {
-                      class: watchEffectRef(
-                        () =>
-                          `egg_settings_submit_btn_wrap${
-                            saveShow.value ? ' active' : ''
-                          }`
+                        )
                       ),
-                    },
-                    createElementNode(
-                      'button',
-                      undefined,
-                      {
-                        class: 'egg_settings_submit_btn',
-                        onclick: debounce(() => {
-                          // 创建提示
-                        }, 300),
-                      },
-                      createTextNode('保存')
-                    )
+                    ]
                   ),
                 ]
               )

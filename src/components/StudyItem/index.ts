@@ -1,3 +1,4 @@
+import { UserInfo } from '../../api/user';
 import URL_CONFIG from '../../config/url';
 import {
   ReadAndWatch,
@@ -8,6 +9,7 @@ import {
 import useCurrentWindow from '../../hooks/useWindow';
 import store from '../../store';
 import { NewsVideoList, TaskConfig } from '../../types';
+import { notification, onTabRemoved } from '../../utils/chromeUtils';
 import {
   ref,
   watch,
@@ -20,12 +22,16 @@ import { createDocumentHandler } from '../../utils/domHandler';
 import { createElementNode, createTextNode } from '../../utils/element';
 import { error, log } from '../../utils/log';
 import { fetchMessageData, onMessage, sendMessage } from '../../utils/message';
+import {
+  createHighlightHTML,
+  createProgressHTML,
+  pushModal,
+} from '../../utils/push';
 import { createRandomPath, createRandomPoint } from '../../utils/random';
 import {
   boxModelToBounds,
   createCountDown,
   debounce,
-  onTabRemoved,
   sleep,
   waitCondition,
 } from '../../utils/utils';
@@ -42,13 +48,35 @@ function StudyItem() {
     maxWatch,
     settings,
     isBlack,
+    userInfo,
+    pushToken,
   } = store;
   // 学习状态
   const studyStatus = ref<StudyStatusType>(StudyStatusType.LOADING);
   // 暂停
   const paused = ref(false);
+  // 任务完成
+  const isFinished = () =>
+    taskConfig.every((task) => !task.active || (task.active && task.status));
+  // 获取用户信息
+  const getUserInfo = async () => {
+    log('获取用户信息...');
+    try {
+      const data = await fetchMessageData<UserInfo | undefined>('getUserInfo', {
+        type: 'tab',
+        id: tabId.value,
+      });
+      if (data) {
+        userInfo.value = data;
+        log('获取用户信息成功!');
+        return;
+      }
+    } catch (e) {}
+    error('获取用户信息失败!');
+  };
   // 刷新任务
   const refreshTaskConfig = async () => {
+    log('获取任务进度...');
     try {
       // 获取任务进度
       const data = await fetchMessageData<
@@ -58,67 +86,69 @@ function StudyItem() {
         id: tabId.value,
         data: null,
       });
-      if (!data) {
-        return false;
+      if (data) {
+        // 数据
+        const { taskProgress, inBlackList } = data;
+        taskProgress.forEach((task, i) => {
+          taskConfig[i].currentScore = task.currentScore;
+          taskConfig[i].dayMaxScore = task.dayMaxScore;
+          taskConfig[i].status = task.status;
+          taskConfig[i].need = task.need;
+        });
+        isBlack.value = inBlackList;
+        log('获取任务进度成功!');
+        return;
       }
-      // 数据
-      const { taskProgress, inBlackList } = data;
-      taskProgress.forEach((task, i) => {
-        taskConfig[i].currentScore = task.currentScore;
-        taskConfig[i].dayMaxScore = task.dayMaxScore;
-        taskConfig[i].status = task.status;
-        taskConfig[i].need = task.need;
-      });
-      isBlack.value = inBlackList;
-      return true;
-    } catch (e) {
-      return false;
-    }
+    } catch (e) {}
+    error('获取任务进度失败!');
   };
   // 刷新总分
   const refreshTotalScore = async () => {
+    log('获取总分...');
     try {
       // 获取总分
-      const res = await fetchMessageData<number | undefined>('getTotalScore', {
+      const data = await fetchMessageData<number | undefined>('getTotalScore', {
         type: 'tab',
         id: tabId.value,
         data: null,
       });
-      if (!res) {
-        return false;
+      if (data) {
+        totalScore.value = data;
+        log('获取总分成功!');
+        return;
       }
-      totalScore.value = res;
-      return true;
-    } catch (e) {
-      return false;
-    }
+    } catch (e) {}
+    error('获取总分失败!');
   };
   // 刷新当天分数
   const refreshTodayScore = async () => {
+    log('获取当天分数...');
     try {
       // 获取当天分数
-      const res = await fetchMessageData<number | undefined>('getTodayScore', {
+      const data = await fetchMessageData<number | undefined>('getTodayScore', {
         type: 'tab',
         id: tabId.value,
         data: null,
       });
-      if (!res) {
-        return false;
+      if (data) {
+        todayScore.value = data;
+        log('获取当天分数成功!');
+        return;
       }
-      todayScore.value = res;
-      return true;
-    } catch (e) {
-      return false;
-    }
+    } catch (e) {}
+    error('获取当天分数失败!');
   };
   // 刷新数据
-  const refreshData = async () => {
-    // 刷新任务
-    await refreshTaskConfig();
-    // 刷新当天分数
-    await refreshTodayScore();
-    // 刷新总分
-    await refreshTotalScore();
+  const refreshData = () => {
+    // 减少阻塞
+    return Promise.all([
+      // 刷新任务
+      refreshTaskConfig(),
+      // 刷新当天分数
+      refreshTodayScore(),
+      // 刷新总分
+      refreshTotalScore(),
+    ]);
   };
   // 文章选读
   const handleRead = async () => {
@@ -961,7 +991,42 @@ function StudyItem() {
     ) {
       await handlePracticeExam();
     }
-    studyStatus.value = StudyStatusType.FINISH;
+    // 完成
+    if (isFinished()) {
+      studyStatus.value = StudyStatusType.FINISH;
+      // 远程推送
+      if (settings[SettingType.REMOTE_PUSH]) {
+        if (!userInfo.value) {
+          notification('用户信息不存在!');
+          return;
+        }
+        if (!pushToken.value) {
+          notification('推送 token 不存在!');
+          return;
+        }
+        const res = await pushModal(
+          {
+            title: '学习推送',
+            to: userInfo.value.nick,
+            content: [
+              '学习强国, 学习完成!',
+              `当天积分:  ${createHighlightHTML(todayScore.value)} 分`,
+              `总积分: ${createHighlightHTML(totalScore.value)} 分`,
+              ...taskConfig.map((task) =>
+                createProgressHTML(
+                  task.title,
+                  task.currentScore,
+                  task.dayMaxScore
+                )
+              ),
+            ],
+            type: 'success',
+          },
+          pushToken.value
+        );
+        notification(`推送${res ? '成功' : '失败'}!`);
+      }
+    }
   };
   // 暂停学习
   const pauseStudy = () => {
@@ -989,7 +1054,6 @@ function StudyItem() {
               studyStatus.value === StudyStatusType.PROGRESS ? ' loading' : ''
             }`
         ),
-
         type: 'button',
         disabled: watchRef(
           studyStatus,
@@ -1028,22 +1092,20 @@ function StudyItem() {
     ),
     {
       async onMounted() {
+        // 获取用户信息
+        await getUserInfo();
         // 刷新数据
         await refreshData();
         // 设置学习状态
         watch(
           () => taskConfig.map((task) => task.active),
-          () => {
+          async () => {
             if (
               studyStatus.value === StudyStatusType.LOADING ||
               studyStatus.value === StudyStatusType.FINISH
             ) {
               // 学习完成
-              if (
-                taskConfig.every(
-                  (task) => !task.active || (task.active && task.status)
-                )
-              ) {
+              if (isFinished()) {
                 studyStatus.value = StudyStatusType.FINISH;
                 return;
               }
@@ -1053,6 +1115,43 @@ function StudyItem() {
           },
           true
         );
+        // 远程推送
+        if (settings[SettingType.REMOTE_PUSH]) {
+          if (!userInfo.value) {
+            notification('用户信息不存在!');
+            return;
+          }
+          if (!pushToken.value) {
+            notification('推送 token 不存在!');
+            return;
+          }
+          // 学习完成
+          const finished = isFinished();
+          // 推送
+          const res = await pushModal(
+            {
+              title: '学习推送',
+              to: userInfo.value.nick,
+              content: [
+                `学习强国, 学习${createHighlightHTML(
+                  finished ? '完成' : '未完成'
+                )}!`,
+                `当天积分:  ${createHighlightHTML(todayScore.value)} 分`,
+                `总积分: ${createHighlightHTML(totalScore.value)} 分`,
+                ...taskConfig.map((task) =>
+                  createProgressHTML(
+                    task.title,
+                    task.currentScore,
+                    task.dayMaxScore
+                  )
+                ),
+              ],
+              type: 'success',
+            },
+            pushToken.value
+          );
+          notification(`推送${res ? '成功' : '失败'}!`);
+        }
       },
     }
   );

@@ -1,18 +1,13 @@
-import { UserInfo } from '../../api/user';
 import store from '../../store';
-import { ref, watchEffect, watchEffectRef } from '../../utils/composition';
+import { watchEffect, watchEffectRef } from '../../utils/composition';
 import { createElementNode, createTextNode } from '../../utils/element';
-import { createMessageListeners, sendMessage } from '../../utils/message';
+import { sendMessage } from '../../utils/message';
 import { debounce } from '../../utils/utils';
 import './index.less';
 
 function UserItem() {
   // 存储
-  const { login, tabId, isBlack } = store;
-  // 事件监听
-  const { addListener, removeAllListeners } = createMessageListeners();
-  // 用户信息
-  const userInfo = ref<UserInfo | null>(null);
+  const { login, tabId, isBlack, userInfo } = store;
   return createElementNode(
     'div',
     undefined,
@@ -82,25 +77,8 @@ function UserItem() {
     ),
     {
       onMounted() {
-        // 监听用户信息
-        addListener<UserInfo | undefined>('getUserInfo', (res) => {
-          if (!res) {
-            return;
-          }
-          userInfo.value = res;
-        });
-        // 更新用户信息
-        sendMessage('getUserInfo', {
-          type: 'tab',
-          id: tabId.value,
-          data: null,
-        });
         // 重置
         watchEffect(() => !login.value && (userInfo.value = null));
-      },
-      beforeDestroy() {
-        // 移除监听
-        removeAllListeners();
       },
     }
   );

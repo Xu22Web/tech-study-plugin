@@ -2,11 +2,19 @@ import URL_CONFIG from '../../config/url';
 import { SettingType } from '../../enum';
 import useCurrentWindow from '../../hooks/useWindow';
 import store from '../../store';
+import { Settings, TaskConfig } from '../../types';
+import { notification, onTabRemoved } from '../../utils/chromeUtils';
 import { ref, watchEffectRef, watchRef } from '../../utils/composition';
 import { createElementNode, createTextNode } from '../../utils/element';
 import { log } from '../../utils/log';
 import { onMessage, sendMessage } from '../../utils/message';
-import { debounce, notification, onTabRemoved } from '../../utils/utils';
+import {
+  addValueListener,
+  getValue,
+  removeAllValues,
+  setValue,
+} from '../../utils/storage';
+import { debounce } from '../../utils/utils';
 import Hr from '../Hr';
 import Icon from '../Icon';
 import LoginItem from '../LoginItem';
@@ -22,10 +30,18 @@ import './index.less';
 /**
  * @description 面板
  */
-function Panel() {
+async function Panel() {
   // 存储
-  const { tabId, login, themeColor, settings, taskConfig, maxRead, maxWatch } =
-    store;
+  const {
+    tabId,
+    login,
+    themeColor,
+    settings,
+    taskConfig,
+    maxRead,
+    maxWatch,
+    pushToken,
+  } = store;
   // 运行设置标签
   const runLabels = [
     {
@@ -74,26 +90,86 @@ function Panel() {
     if (settings[type] !== checked) {
       settings[type] = checked;
       // 本地存储
-      chrome.storage.local.set({
-        settings: JSON.parse(JSON.stringify(settings)),
-      });
+      setValue('settings', settings);
       // 通知
       notification(`${title} ${checked ? '打开' : '关闭'}`);
     }
   };
+  // 初始化任务配置
+  const initTaskConfig = async () => {
+    // 任务配置
+    const taskConfigTemp = await getValue<TaskConfig>('taskConfig');
+    try {
+      if (taskConfigTemp && taskConfig.length === taskConfigTemp.length) {
+        taskConfig.forEach((task, i) => {
+          task.active = taskConfigTemp[i].active;
+        });
+      }
+    } catch (e) {
+      taskConfig.forEach((task) => {
+        task.active = true;
+      });
+    }
+  };
   // 初始化设置
   const initSettings = async () => {
-    // 获取配置信息
-    const { settings: settingsTemp } = await chrome.storage.local.get(
-      'settings'
-    );
+    // 设置信息
+    const settingsTemp = await getValue<Settings>('settings');
     try {
-      if (settings.length === settingsTemp.length) {
+      if (settingsTemp && settings.length === settingsTemp.length) {
         settings.forEach((_, i) => (settings[i] = settingsTemp[i]));
       }
-    } catch (error) {
-      settings.forEach((_, i) => (settings[i] = false));
+    } catch (e) {
+      settings.fill(false);
     }
+  };
+  // 初始化最大阅读
+  const initMaxRead = async () => {
+    // 最大阅读时间
+    const maxReadTemp = await getValue<number>('maxRead');
+    maxReadTemp && (maxRead.value = maxReadTemp);
+    // 监听变化
+    addValueListener<number>('maxRead', (newValue) => {
+      newValue && (maxRead.value = newValue);
+    });
+  };
+  // 初始化最大观看
+  const initMaxWatch = async () => {
+    // 最大观看时间
+    const maxWatchTemp = await getValue<number>('maxWatch');
+    maxWatchTemp && (maxWatch.value = maxWatchTemp);
+    // 监听变化
+    addValueListener<number>('newWatch', (newValue) => {
+      newValue && (maxWatch.value = newValue);
+    });
+  };
+  // 初始化推送
+  const initPushToken = async () => {
+    // 推送 token
+    const pushTokenTemp = await getValue<string>('pushToken');
+    pushTokenTemp && (pushToken.value = pushTokenTemp);
+  };
+  // 初始化主题色
+  const initThemeColor = async () => {
+    // 获取颜色
+    const themeColorTemp = await getValue<string>('themeColor');
+    // 设置主题色
+    themeColorTemp && (themeColor.value = themeColorTemp);
+    // 监听颜色变化
+    addValueListener<string>('themeColor', (newValue) => {
+      newValue && (themeColor.value = newValue);
+    });
+  };
+  // 初始化配置数据
+  const initConfigData = () => {
+    return Promise.all([
+      initThemeColor(),
+      initTaskConfig(),
+      initSettings(),
+      initMaxRead(),
+      initMaxWatch(),
+      initPushToken(),
+    ]);
   };
   // 初始化监听
   const initConnectionListener = () => {
@@ -211,6 +287,10 @@ function Panel() {
     // 登录成功
     login.value = true;
   };
+  // 初始化配置数据
+  await initConfigData();
+  // 初始化连接监听
+  initConnectionListener();
   return createElementNode(
     'div',
     undefined,
@@ -251,7 +331,7 @@ function Panel() {
                 class: 'egg_btn',
                 title: '重置',
                 type: 'button',
-                onclick: debounce(async () => {
+                onclick: debounce(() => {
                   // 重置任务配置
                   taskConfig.forEach((task) => {
                     !task.disabled && (task.active = true);
@@ -264,23 +344,17 @@ function Panel() {
                   maxWatch.value = 100;
                   // 重置主题
                   themeColor.value = '#fa3333';
+                  // 重置推送 token
+                  pushToken.value = '';
                   // 任务配置
-                  await chrome.storage.local.set(
-                    JSON.parse(
-                      JSON.stringify({
-                        settings,
-                        taskConfig,
-                        maxRead,
-                        maxWatch,
-                        themeColor,
-                      })
-                    )
-                  );
+                  removeAllValues();
                 }, 300),
               },
               Icon({
                 paths: [
-                  'M943.8 484.1c-17.5-13.7-42.8-10.7-56.6 6.8-5.7 7.3-8.5 15.8-8.6 24.4h-0.4c-0.6 78.3-26.1 157-78 223.3-124.9 159.2-356 187.1-515.2 62.3-31.7-24.9-58.2-54-79.3-85.9h77.1c22.4 0 40.7-18.3 40.7-40.7v-3c0-22.4-18.3-40.7-40.7-40.7H105.5c-22.4 0-40.7 18.3-40.7 40.7v177.3c0 22.4 18.3 40.7 40.7 40.7h3c22.4 0 40.7-18.3 40.7-40.7v-73.1c24.2 33.3 53 63.1 86 89 47.6 37.3 101 64.2 158.9 79.9 55.9 15.2 113.5 19.3 171.2 12.3 57.7-7 112.7-24.7 163.3-52.8 52.5-29 98-67.9 135.3-115.4 37.3-47.6 64.2-101 79.9-158.9 10.2-37.6 15.4-76 15.6-114.6h-0.1c-0.3-11.6-5.5-23.1-15.5-30.9zM918.7 135.2h-3c-22.4 0-40.7 18.3-40.7 40.7V249c-24.2-33.3-53-63.1-86-89-47.6-37.3-101-64.2-158.9-79.9-55.9-15.2-113.5-19.3-171.2-12.3-57.7 7-112.7 24.7-163.3 52.8-52.5 29-98 67.9-135.3 115.4-37.3 47.5-64.2 101-79.9 158.8-10.2 37.6-15.4 76-15.6 114.6h0.1c0.2 11.7 5.5 23.2 15.4 30.9 17.5 13.7 42.8 10.7 56.6-6.8 5.7-7.3 8.5-15.8 8.6-24.4h0.4c0.6-78.3 26.1-157 78-223.3 124.9-159.2 356-187.1 515.2-62.3 31.7 24.9 58.2 54 79.3 85.9h-77.1c-22.4 0-40.7 18.3-40.7 40.7v3c0 22.4 18.3 40.7 40.7 40.7h177.3c22.4 0 40.7-18.3 40.7-40.7V175.8c0.1-22.3-18.2-40.6-40.6-40.6z',
+                  'M930.816609 339.889816V379.21591H90.455424v-39.326094h840.361185m9.363355-65.543491H81.092069c-31.016116 0-56.180135 28.558235-56.180135 63.787862v42.837353C24.911934 416.201166 50.075953 444.759401 81.092069 444.759401h859.087895c31.016116 0 56.180135-28.558235 56.180135-63.787861v-42.837353c0-35.229626-25.164019-63.787861-56.180135-63.787862z',
+                  'M966.280319 1024h-0.234084l-906.255801-6.554349a33.122871 33.122871 0 0 1-24.929935-11.821237 32.771745 32.771745 0 0 1-7.139558-26.685564l98.549319-563.205852a32.771745 32.771745 0 1 1 64.490114 11.236027L98.999487 952.136244l827.954737 5.969139-95.974397-530.902274a32.771745 32.771745 0 0 1 64.490113-11.704195l103.113956 569.877243a32.888787 32.888787 0 0 1-32.303577 38.623843z',
+                  'M283.69168 1001.996114a29.962739 29.962739 0 0 1-4.564636-0.351126 28.090067 28.090067 0 0 1-23.291347-32.186536l61.798148-380.854497a28.090067 28.090067 0 1 1 55.360841 9.01223L311.31358 978.470682a27.973025 27.973025 0 0 1-27.6219 23.525432zM566.1139 333.218425h-114.935193a32.771745 32.771745 0 0 1-32.771745-32.771745V90.239342a90.239342 90.239342 0 1 1 180.478683 0v210.207338a32.771745 32.771745 0 0 1-32.771745 32.771745z m-82.163448-65.543491h49.391702V90.239342a24.695851 24.695851 0 1 0-49.391702 0z',
                 ],
               })
             ),
@@ -387,13 +461,7 @@ function Panel() {
           ],
         })
       ),
-    ],
-    {
-      beforeCreat() {
-        initSettings();
-        initConnectionListener();
-      },
-    }
+    ]
   );
 }
 

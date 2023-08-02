@@ -96,22 +96,36 @@
       .egg_settings_read_time_wrap .egg_select,
       .egg_settings_watch_time_wrap .egg_select {
         width: 6rem;
+        .egg_select_input,
+        .egg_select_item {
+          padding: 0.8rem;
+          height: 3rem;
+        }
       }
       .egg_settings_token_wrap {
-        padding: 1rem 2rem 0 2rem;
-        .egg_settings_token_input {
-          outline: none;
+        padding: 0.5rem 0;
+        .egg_settings_token_input_wrap {
+          margin-top: 0.5rem;
           border: 0.1rem solid #eee;
-          padding: 1rem;
-          background: white;
-          border-radius: 0.2rem;
-          width: 100%;
-          box-sizing: border-box;
-          color: #ccc;
-          &.active {
-            color: #333;
-            &::placeholder {
-              color: #ccc;
+          .egg_settings_token_input {
+            padding: 1rem;
+            background: white;
+            border-radius: 0.3rem;
+            width: 100%;
+            box-sizing: border-box;
+            color: #ccc;
+            transition: 80ms ease;
+            &:valid {
+              filter: blur(0.2rem);
+              &:focus {
+                filter: blur(0);
+              }
+            }
+            &:focus {
+              color: #333;
+              &::placeholder {
+                color: #ccc;
+              }
             }
           }
         }

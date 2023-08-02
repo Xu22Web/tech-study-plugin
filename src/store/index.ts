@@ -1,3 +1,4 @@
+import { UserInfo } from '../api/user';
 import { TaskType } from '../enum';
 import { Settings, TaskConfig } from '../types';
 import { Reactive, Ref, reactive, ref } from '../utils/composition';
@@ -47,6 +48,14 @@ interface Store {
    * @description 消息
    */
   message: Ref<string>;
+  /**
+   * @description 推送 token
+   */
+  pushToken: Ref<string>;
+  /**
+   * @description 用户信息
+   */
+  userInfo: Ref<UserInfo | null>;
 }
 
 /**
@@ -118,6 +127,8 @@ const store: Store = {
   maxRead: ref(80),
   maxWatch: ref(100),
   message: ref(''),
+  pushToken: ref(''),
+  userInfo: ref(null),
 };
 
 export default store;

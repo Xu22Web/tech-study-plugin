@@ -1,9 +1,11 @@
 import { TaskType } from '../../enum';
 import store from '../../store';
-import TaskItem from '../TaskItem';
+import { notification } from '../../utils/chromeUtils';
 import { watchEffect, watchEffectRef } from '../../utils/composition';
 import { createElementNode } from '../../utils/element';
-import { debounce, notification } from '../../utils/utils';
+import { setValue } from '../../utils/storage';
+import { debounce } from '../../utils/utils';
+import TaskItem from '../TaskItem';
 import './index.less';
 
 function TaskList() {
@@ -16,9 +18,7 @@ function TaskList() {
     if (taskConfig[type].active !== checked) {
       taskConfig[type].active = checked;
       // 本地存储
-      chrome.storage.local.set({
-        taskConfig: JSON.parse(JSON.stringify(taskConfig)),
-      });
+      setValue('taskConfig', taskConfig);
       // 通知
       notification(`${title} ${checked ? '打开' : '关闭'}`);
     }
@@ -43,22 +43,7 @@ function TaskList() {
       })
     ),
     {
-      async onMounted() {
-        // 获取任务配置
-        const { taskConfig: taskConfigTemp } = await chrome.storage.local.get(
-          'taskConfig'
-        );
-        try {
-          if (taskConfig.length === taskConfigTemp.length) {
-            taskConfig.forEach((task, i) => {
-              task.active = taskConfigTemp[i].active;
-            });
-          }
-        } catch (error) {
-          taskConfig.forEach((task) => {
-            task.active = true;
-          });
-        }
+      onMounted() {
         // 重置
         watchEffect(
           () =>

@@ -18,12 +18,12 @@ function TimeInput({
   onchange?: (data: { hour: number; minute: number }) => void;
 }) {
   // 小时
-  const hours = new Array(24).fill(undefined).map((v, i) => ({
+  const hours = new Array(24).fill(undefined).map((_v, i) => ({
     value: i,
     label: formatDateNum(i),
   }));
   // 分钟
-  const minutes = new Array(60).fill(undefined).map((v, i) => ({
+  const minutes = new Array(60).fill(undefined).map((_v, i) => ({
     value: i,
     label: formatDateNum(i),
   }));

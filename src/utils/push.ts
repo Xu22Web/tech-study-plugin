@@ -39,7 +39,7 @@ type ModalType = 'info' | 'warn' | 'fail' | 'success';
  * @param percent
  * @returns
  */
-function getProgressHTML(title: string, current: number, total: number) {
+function createProgressHTML(title: string, current: number, total: number) {
   // html
   const progressHTML = `<div
     style="
@@ -50,7 +50,7 @@ function getProgressHTML(title: string, current: number, total: number) {
     "
   >
     <span>${title}</span>
-    <span>${getHighlightHTML(`${current}`)} / ${total}</span>
+    <span>${createHighlightHTML(`${current}`)} / ${total}</span>
   </div>
   <div
     style="
@@ -77,7 +77,7 @@ function getProgressHTML(title: string, current: number, total: number) {
  * @param text
  * @returns
  */
-function getHighlightHTML(text: string | number) {
+function createHighlightHTML(text: string | number) {
   // html
   const highlightHTML = `<span style="color: #1890ff">${text}</span>`;
   return highlightHTML;
@@ -86,7 +86,7 @@ function getHighlightHTML(text: string | number) {
  * @description 二维码
  * @param src
  */
-function getImgHTML(src: string) {
+function createImgHTML(src: string) {
   // 图片
   return `
      <div style="padding: 10px 0">
@@ -105,6 +105,7 @@ function getImgHTML(src: string) {
      </div>
 `;
 }
+
 /**
  * @description 创建模态框
  * @param options 选项
@@ -118,7 +119,7 @@ function createModal(options: ModalOptions) {
     to = '用户',
     content,
     type,
-    from = 'tech-study.js',
+    from = 'tech-study-plugin',
   } = options;
   // 内容文本
   let contentText = '';
@@ -238,7 +239,7 @@ function createModal(options: ModalOptions) {
 
     <div style="padding:10px 5px; font-size: 16px; min-height: 80px">
       <div>
-        ${getHighlightHTML(to)}, 你好!
+        ${createHighlightHTML(to)}, 你好!
       </div>
       <div style="line-height: 28px;">${contentText}</div>
     </div>
@@ -298,10 +299,31 @@ async function pushModal(
   return;
 }
 
+/**
+ * @description
+ * @param url
+ * @returns
+ */
+function createAHTML(url: string) {
+  return `
+   <div>
+      或在浏览器
+      <a
+        href="dtxuexi://appclient/page/study_feeds?url=${encodeURIComponent(
+          url
+        )}"
+        style="text-decoration: none"
+      >${createHighlightHTML('打开学习强国APP')}</a
+      >
+    </div>
+  `;
+}
+
 export {
+  createAHTML,
+  createHighlightHTML,
+  createImgHTML,
   createModal,
-  getHighlightHTML,
-  getImgHTML,
-  getProgressHTML,
+  createProgressHTML,
   pushModal,
 };

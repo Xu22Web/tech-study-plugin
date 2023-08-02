@@ -1,5 +1,4 @@
 import Protocal from 'devtools-protocol';
-import { sleep } from './utils';
 
 /**
  * @description 鼠标事件初始化

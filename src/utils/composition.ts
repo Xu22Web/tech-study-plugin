@@ -253,7 +253,7 @@ const unref = <T>(val: T) => {
 };
 
 /**
- * @description 顶层 ref
+ * @description 嵌套 ref
  * @param v
  * @returns
  */
@@ -264,7 +264,7 @@ const ref = <T>(value: T): Ref<UnwrapRef<T>> => {
 };
 
 /**
- * @description ref
+ * @description 顶层 ref
  * @param value
  * @returns
  */
