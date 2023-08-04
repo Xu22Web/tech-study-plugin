@@ -3,16 +3,7 @@ import { TaskType } from '../enum';
 /**
  * @description 设置
  */
-export type Settings = [
-  boolean,
-  boolean,
-  boolean,
-  boolean,
-  boolean,
-  boolean,
-  boolean,
-  boolean
-];
+export type Settings = [boolean, boolean, boolean, boolean];
 
 /**
  * @description 任务配置

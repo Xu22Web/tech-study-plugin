@@ -2,60 +2,70 @@ import {
   Ref,
   reactive,
   ref,
-  shallowRef,
   watch,
   watchEffectRef,
   watchRef,
 } from '../../utils/composition';
 import { createElementNode, createTextNode } from '../../utils/element';
-import { debounce } from '../../utils/utils';
 import './index.less';
 
-function Select<T>({
+function Select({
   data,
   maxlength,
   placeholder = '',
   onchange,
-  onblur,
   value,
   keep,
 }: {
-  data: { label: string; value: T; selected?: boolean }[];
+  data: { label: string; value: number; selected?: boolean }[];
   maxlength?: number;
   placeholder?: string;
-  onchange?: (data: { value: T; label: string }) => void;
-  onblur?: (data: { value: T; label: string } | undefined) => void;
-  value?: Ref<T>;
+  onchange?: (selectData: { value: number; label: string }) => void;
+  value?: Ref<number | null>;
   keep?: boolean;
 }) {
+  // 选择数据
   const selectData = reactive<
     {
       label: string;
-      value: T;
+      value: number;
       selected: boolean;
       active: boolean;
-      ele: HTMLElement | undefined;
+      ele: HTMLElement | null;
     }[]
   >(
-    data.map((v) => ({ selected: false, active: false, ele: undefined, ...v }))
+    data.map((v) => ({
+      selected: false,
+      active: false,
+      ele: null,
+      ...v,
+    }))
   );
+  // 值
+  const valueRef = value?.value
+    ? watchEffectRef(() => value.value)
+    : ref<number | null>(null);
+  // 标签
+  const labelRef = watchEffectRef(
+    () =>
+      selectData.find((item) => item.value === valueRef.value)?.label || null
+  );
+  // 聚焦
   const focus = ref(false);
-  const input = shallowRef<HTMLInputElement | undefined>(undefined);
-  const list = shallowRef<HTMLElement | undefined>(undefined);
-  const valueRef = ref('');
-  value &&
-    watch(
-      value,
-      () => {
-        const item = selectData.find((v) => v.value === value.value);
-        valueRef.value = item ? item.label : '';
-        if (!item) {
-          selectData.forEach((v) => (v.selected = false));
-          list.value && (list.value.scrollTop = 0);
-        }
-      },
-      true
-    );
+  // 输入值
+  const inputValueRef = ref<string | null>(labelRef);
+  // 滚动顶部距离
+  const listScrollTop = ref<number>(0);
+  // 滚动到指定位置
+  watch(
+    () => selectData.map((item) => [item.active, item.selected]),
+    () =>
+      selectData.forEach(
+        (item) =>
+          (item.selected || item.active) &&
+          (listScrollTop.value = item.ele?.offsetTop || 0)
+      )
+  );
   return createElementNode(
     'div',
     undefined,
@@ -65,89 +75,83 @@ function Select<T>({
     [
       createElementNode(
         'input',
-        { value: valueRef },
+        { value: inputValueRef },
         {
           class: 'egg_select_input',
           type: 'text',
           placeholder,
           maxlength,
-          ref: input,
           onfocus() {
-            if (list.value && input.value) {
-              focus.value = true;
-              if (input.value.value && valueRef.value) {
-                const index = selectData.findIndex(
-                  (v) => v.label === valueRef.value
-                );
-                if (index + 1) {
-                  list.value.scrollTop = selectData[index].ele?.offsetTop || 0;
-                  selectData.forEach((v, i) => (v.selected = i === index));
-                }
-                return;
+            focus.value = true;
+            // 初始值存在
+            if (valueRef.value) {
+              // 查找匹配值
+              const index = selectData.findIndex(
+                (v) => v.value === valueRef.value
+              );
+              // 存在
+              if (index + 1) {
+                // 设置输入框
+                inputValueRef.value = selectData[index].label;
+                // 设置选择项目
+                selectData.forEach((v, i) => (v.selected = i === index));
               }
             }
           },
-          oninput() {
-            if (list.value && input.value) {
-              const { value } = input.value;
-              // 文本存在
-              if (value) {
-                const index = selectData.findIndex((v) =>
-                  v.label.includes(value)
-                );
-                // 存在匹配
-                if (index + 1) {
-                  list.value.scrollTop = selectData[index].ele?.offsetTop || 0;
-                  selectData.forEach((v, i) => {
-                    v.active = i === index;
-                    v.active &&
-                      setTimeout(() => {
-                        v.active = false;
-                      }, 300);
-                  });
-                }
-                return;
+          oninput(e: InputEvent) {
+            // 输入框元素
+            const inputEle = <HTMLInputElement>e.target;
+            // 绑定输入值
+            inputValueRef.value = inputEle.value;
+            // 文本存在
+            const index = selectData.findIndex((v) =>
+              v.label.includes(inputEle.value)
+            );
+            // 移动到匹配选项
+            if (inputValueRef.value) {
+              // 存在匹配
+              if (index + 1) {
+                selectData.forEach((v, i) => {
+                  v.active = i === index;
+                  v.active &&
+                    setTimeout(() => {
+                      v.active = false;
+                    }, 100);
+                });
               }
-              // 清除
-              selectData.forEach((v) => (v.active = v.selected = false));
-              list.value.scrollTop = 0;
+              return;
             }
+            // 清除
+            selectData.forEach((v) => (v.active = v.selected = false));
+            // 滚回起始位置
+            listScrollTop.value = 0;
           },
           onblur() {
-            if (list.value && input.value) {
-              const item = selectData.find((v) => v.selected);
-              // 关闭选项
-              if (item || !input.value.value) {
-                setTimeout(() => {
-                  focus.value = false;
-                }, 100);
-              }
-              // 恢复文本
-              if (item && input.value.value !== item.label) {
-                input.value.value = item.label;
-              }
-              // 保留文本
-              if (!item && keep) {
-                input.value.value = valueRef.value;
-              }
-              onblur &&
-                onblur(
-                  item ? { label: item.label, value: item.value } : undefined
-                );
+            if (keep) {
+              // 恢复默认
+              const defaultItem = selectData.find(
+                (v) => v.value === valueRef.value
+              );
+              inputValueRef.value = defaultItem?.label || null;
             }
+            // 失去焦点
+            setTimeout(() => {
+              focus.value = false;
+            }, 100);
           },
         }
       ),
       createElementNode(
         'div',
-        undefined,
+        {
+          scrollTop: listScrollTop,
+        },
         {
           class: watchEffectRef(
             () => `egg_select_list${focus.value ? ' active' : ''}`
           ),
-          ref: list,
         },
-        selectData.map((v, index) =>
+        selectData.map((v, i) =>
           createElementNode(
             'button',
             undefined,
@@ -161,16 +165,19 @@ function Select<T>({
                   }`
               ),
               ref: (e) => (v.ele = e),
-              onclick: debounce(() => {
-                if (valueRef.value !== v.label) {
+              onclick() {
+                if (inputValueRef.value !== v.label) {
+                  // 设置输入框值
+                  inputValueRef.value = v.label;
+                  // 设置选择
+                  selectData.forEach(
+                    (item, index) => (item.selected = index === i)
+                  );
+                  // 变化之
                   onchange && onchange({ label: v.label, value: v.value });
-                  selectData.forEach((v, i) => {
-                    v.selected = i === index;
-                    v.selected && (valueRef.value = v.label);
-                  });
                 }
                 focus.value = false;
-              }, 300),
+              },
             },
             createTextNode(v.label)
           )

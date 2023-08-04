@@ -46,12 +46,6 @@ function TimeInput({
           valueRef.value.hour = value;
           onchange && onchange(valueRef.value);
         },
-        onblur(res) {
-          if (!res) {
-            valueRef.value.hour = -1;
-            onchange && onchange(valueRef.value);
-          }
-        },
       }),
     ]),
     createElementNode(
@@ -69,12 +63,6 @@ function TimeInput({
         onchange({ value }) {
           valueRef.value.minute = value;
           onchange && onchange(valueRef.value);
-        },
-        onblur(res) {
-          if (!res) {
-            valueRef.value.minute = -1;
-            onchange && onchange(valueRef.value);
-          }
         },
       }),
     ]),

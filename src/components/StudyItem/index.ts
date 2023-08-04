@@ -9,7 +9,7 @@ import {
 import useCurrentWindow from '../../hooks/useWindow';
 import store from '../../store';
 import { NewsVideoList, TaskConfig } from '../../types';
-import { notification, onTabRemoved } from '../../utils/chromeUtils';
+import { onTabRemoved } from '../../utils/chromeUtils';
 import {
   ref,
   watch,
@@ -35,6 +35,7 @@ import {
   sleep,
   waitCondition,
 } from '../../utils/utils';
+import { useMessage } from '../MessageWrap';
 import './index.less';
 
 function StudyItem() {
@@ -50,7 +51,10 @@ function StudyItem() {
     isBlack,
     userInfo,
     pushToken,
+    notify,
   } = store;
+  // 消息
+  const message = useMessage();
   // 学习状态
   const studyStatus = ref<StudyStatusType>(StudyStatusType.LOADING);
   // 暂停
@@ -169,7 +173,14 @@ function StudyItem() {
       // 窗口
       const win = await useCurrentWindow();
       for (const i in news) {
+        // 提示
         log(`阅读第${Number(i) + 1}篇文章`);
+        // 消息
+        message.create({
+          title: '文章选读',
+          type: 'info',
+          message: `阅读第 ${Number(i) + 1} 篇文章`,
+        });
         // 等待
         await waitCondition(() => {
           if (paused.value) {
@@ -194,26 +205,34 @@ function StudyItem() {
         win.height.value = 720;
         // 调试
         await chrome.debugger.attach({ tabId: id }, '1.3');
-        // 事件派发
-        const { dispatchMouseWheelEvent } = createDispatchEvent(id);
-        // 等待加载完毕
-        const load = await waitCondition(async () => {
-          try {
-            // 题目加载完成
-            return await fetchMessageData<boolean>('load', {
-              type: 'tab',
-              id,
-            });
-          } catch (e) {
-            return false;
-          }
-        }, 6000);
-        if (!load) {
-          error('页面加载失败!');
-          continue;
-        }
-        log('页面加载成功!');
         try {
+          // 等待加载完毕
+          const load = await waitCondition(async () => {
+            try {
+              // 题目加载完成
+              return await fetchMessageData<boolean>('load', {
+                type: 'tab',
+                id,
+              });
+            } catch (e) {
+              return false;
+            }
+          }, 6000);
+          if (!load) {
+            // 提示
+            error('页面加载失败!');
+            // 消息
+            message.create({
+              title: '文章选读',
+              type: 'fail',
+              message: '页面加载失败!',
+            });
+            throw new Error('页面加载失败!');
+          }
+          // 事件派发
+          const { dispatchMouseWheelEvent } = createDispatchEvent(id);
+          // 提示
+          log('页面加载成功!');
           // 获取数据
           const data = await fetchMessageData<{
             duration: number;
@@ -227,8 +246,15 @@ function StudyItem() {
             id: tab.id!,
           });
           if (!data) {
+            // 提示
             error('获取页面信息失败!');
-            continue;
+            // 消息
+            message.create({
+              title: '文章选读',
+              type: 'fail',
+              message: '获取页面信息失败!',
+            });
+            throw new Error('获取页面信息失败!');
           }
           // 数据
           const { height, duration, innerWidth, innerHeight } = data;
@@ -241,28 +267,47 @@ function StudyItem() {
           });
           // 滚动鼠标次数
           const totalTimes = ~~((height * 12) / (duration * 120));
+          // 倒计时消息
+          const countDownMessage = message.create({
+            title: '文章选读',
+            message: '开始倒计时',
+            type: 'info',
+            keep: true,
+          });
           // 倒计时
-          const { wait, cancel } = createCountDown(duration, async (count) => {
-            // 等待
-            await waitCondition(() => {
-              if (paused.value) {
-                log('等待中...');
+          const { wait, cancel } = createCountDown(
+            duration,
+            async (count, revoked) => {
+              // 等待
+              await waitCondition(() => {
+                if (paused.value) {
+                  //提示
+                  log('等待中...');
+                }
+                return !paused.value;
+              });
+              // 提示
+              log(`剩余${count}s`);
+              // 消息
+              countDownMessage.update({
+                message: `时间剩余 ${count} s`,
+              });
+              if (revoked || count <= 0) {
+                countDownMessage.destroy();
               }
-              return !paused.value;
-            });
-            log(`剩余${count}s`);
-            if (count && count % 12 === 0) {
-              // 滚动次数
-              let times = totalTimes;
-              // 鼠标滚动
-              while (times--) {
-                await dispatchMouseWheelEvent({
-                  direction: 'down',
-                  ...point,
-                });
+              if (count && count % 12 === 0) {
+                // 滚动次数
+                let times = totalTimes;
+                // 鼠标滚动
+                while (times--) {
+                  await dispatchMouseWheelEvent({
+                    direction: 'down',
+                    ...point,
+                  });
+                }
               }
             }
-          });
+          );
           // 页面卸载
           onMessage(
             'unload',
@@ -315,11 +360,19 @@ function StudyItem() {
         }
       }
     } catch (e) {
+      // 提示
       error('获取新闻失败!', e);
+      // 消息
+      message.create({
+        title: '文章选读',
+        type: 'fail',
+        message: '获取新闻失败!',
+      });
     }
     // 等待
     await waitCondition(() => {
       if (paused.value) {
+        // 提示
         log('等待中...');
       }
       return !paused.value;
@@ -348,10 +401,18 @@ function StudyItem() {
       // 窗口
       const win = await useCurrentWindow();
       for (const i in videos) {
+        // 提示
         log(`观看第${Number(i) + 1}个视频`);
+        // 消息
+        message.create({
+          title: '视听学习',
+          type: 'info',
+          message: `观看第 ${Number(i) + 1} 个视频`,
+        });
         // 等待
         await waitCondition(() => {
           if (paused.value) {
+            // 提示
             log('等待中...');
           }
           return !paused.value;
@@ -373,27 +434,35 @@ function StudyItem() {
         win.height.value = 720;
         // 调试
         await chrome.debugger.attach({ tabId: id }, '1.3');
-        // 事件派发
-        const { dispatchMouseWheelEvent, dispatchMouseClickEvent } =
-          createDispatchEvent(id);
-        // 等待加载完毕
-        const load = await waitCondition(async () => {
-          try {
-            // 题目加载完成
-            return await fetchMessageData<boolean>('load', {
-              type: 'tab',
-              id,
-            });
-          } catch (e) {
-            return false;
-          }
-        }, 6000);
-        if (!load) {
-          error('页面加载失败!');
-          continue;
-        }
-        log('页面加载成功!');
         try {
+          // 等待加载完毕
+          const load = await waitCondition(async () => {
+            try {
+              // 题目加载完成
+              return await fetchMessageData<boolean>('load', {
+                type: 'tab',
+                id,
+              });
+            } catch (e) {
+              return false;
+            }
+          }, 6000);
+          if (!load) {
+            // 提示
+            error('页面加载失败!');
+            // 消息
+            message.create({
+              title: '视听学习',
+              type: 'fail',
+              message: '页面加载失败!',
+            });
+            throw new Error('页面加载失败!');
+          }
+          // 提示
+          log('页面加载成功!');
+          // 事件派发
+          const { dispatchMouseWheelEvent, dispatchMouseClickEvent } =
+            createDispatchEvent(id);
           // 获取数据
           const data = await fetchMessageData<{
             duration: number;
@@ -407,8 +476,15 @@ function StudyItem() {
             id,
           });
           if (!data) {
+            // 提示
             error('获取页面信息失败!');
-            continue;
+            // 消息
+            message.create({
+              title: '视听学习',
+              type: 'fail',
+              message: '获取页面信息失败!',
+            });
+            throw new Error('获取页面信息失败!');
           }
           // 设置标签页状态
           watchEffect(() => {
@@ -465,21 +541,46 @@ function StudyItem() {
             }
           }, 10000);
           if (!play) {
+            // 提示
             error('视频播放失败!');
-            continue;
+            // 消息
+            message.create({
+              title: '视听学习',
+              type: 'fail',
+              message: '视频播放失败!',
+            });
+            throw new Error('视频播放失败!');
           }
           log('视频播放成功!');
-          // 创建倒计时
-          const { wait, cancel } = createCountDown(duration, async (count) => {
-            // 等待
-            await waitCondition(() => {
-              if (paused.value) {
-                log('等待中...');
-              }
-              return !paused.value;
-            });
-            log(`剩余${count}s`);
+          // 倒计时消息
+          const countDownMessage = message.create({
+            title: '视听学习',
+            message: '开始倒计时',
+            type: 'info',
+            keep: true,
           });
+          // 创建倒计时
+          const { wait, cancel } = createCountDown(
+            duration,
+            async (count, revoked) => {
+              // 等待
+              await waitCondition(() => {
+                if (paused.value) {
+                  log('等待中...');
+                }
+                return !paused.value;
+              });
+              // 提示
+              log(`剩余${count}s`);
+              // 消息
+              countDownMessage.update({
+                message: `时间剩余 ${count} s`,
+              });
+              if (revoked || count <= 0) {
+                countDownMessage.destroy();
+              }
+            }
+          );
           // 页面卸载
           onMessage(
             'unload',
@@ -533,7 +634,14 @@ function StudyItem() {
         }
       }
     } catch (e) {
+      // 提示
       error('获取视频失败!', e);
+      // 消息
+      message.create({
+        title: '视听学习',
+        type: 'fail',
+        message: '获取视频失败!',
+      });
     }
     // 等待
     await waitCondition(() => {
@@ -775,8 +883,6 @@ function StudyItem() {
     });
     // 标签页被关闭
     let tabRemoved = false;
-    // 改变窗口高度
-    win.height.value = 720;
     // 页面关闭
     onTabRemoved(
       id,
@@ -787,32 +893,42 @@ function StudyItem() {
       },
       { once: true }
     );
-    // 等待加载完毕
-    const load = await waitCondition(async () => {
-      try {
-        // 题目加载完成
-        return await fetchMessageData<boolean>('load', {
-          type: 'tab',
-          id,
-        });
-      } catch (e) {
-        return false;
-      }
-    }, 10000);
-    if (!load) {
-      error('题目加载失败!');
-      return;
-    }
-    log('题目加载成功!');
+    // 改变窗口高度
+    win.height.value = 720;
     // 调试
     await chrome.debugger.attach({ tabId: id }, '1.3');
-    // 事件派发
-    const {
-      dispatchMouseWheelEvent,
-      dispatchMouseClickEvent,
-      dispatchKeyInputEvent,
-    } = createDispatchEvent(id);
     try {
+      // 等待加载完毕
+      const load = await waitCondition(async () => {
+        try {
+          // 题目加载完成
+          return await fetchMessageData<boolean>('load', {
+            type: 'tab',
+            id,
+          });
+        } catch (e) {
+          return false;
+        }
+      }, 10000);
+      if (!load) {
+        // 提示
+        error('题目加载失败!');
+        // 消息
+        message.create({
+          title: '答题',
+          type: 'fail',
+          message: '题目加载失败!',
+        });
+        throw new Error('题目加载失败!');
+      }
+      // 提示
+      log('题目加载成功!');
+      // 事件派发
+      const {
+        dispatchMouseWheelEvent,
+        dispatchMouseClickEvent,
+        dispatchKeyInputEvent,
+      } = createDispatchEvent(id);
       // 滚动次数
       let times = 4;
       while (times--) {
@@ -859,6 +975,12 @@ function StudyItem() {
           id,
         });
         log(`${current}/${total} 题型: ${type}`);
+        // 消息
+        message.create({
+          title: '答题',
+          type: 'info',
+          message: `${current}/${total} 题型: ${type}`,
+        });
         // 处理提示
         await handleTips({ doc, dispatchMouseClickEvent });
         // 处理答案
@@ -921,7 +1043,14 @@ function StudyItem() {
             id,
           });
           if (status) {
+            // 提示
             log('处理滑动验证...');
+            // 消息
+            message.create({
+              title: '答题',
+              type: 'info',
+              message: `处理滑动验证`,
+            });
             // 等待
             await sleep(2000);
             // 处理滑动验证
@@ -933,10 +1062,18 @@ function StudyItem() {
               type: 'tab',
               id,
             });
-            log(`滑动验证${status ? '成功' : '失败'}`);
+            // 提示
+            log(`滑动验证${!status ? '成功' : '失败'}`);
+            // 消息
+            message.create({
+              title: '答题',
+              type: !status ? 'success' : 'fail',
+              message: `滑动验证${!status ? '成功' : '失败'}`,
+            });
           }
         }
       }
+      // 提示
       log('答题结束!');
     } catch (e) {
       error(e);
@@ -997,11 +1134,13 @@ function StudyItem() {
       // 远程推送
       if (settings[SettingType.REMOTE_PUSH]) {
         if (!userInfo.value) {
-          notification('用户信息不存在!');
+          // 通知
+          notify({ title: '推送提示', message: '用户信息不存在!' });
           return;
         }
         if (!pushToken.value) {
-          notification('推送 token 不存在!');
+          // 通知
+          notify({ title: '推送提示', message: '推送 token 不存在!' });
           return;
         }
         const res = await pushModal(
@@ -1024,7 +1163,8 @@ function StudyItem() {
           },
           pushToken.value
         );
-        notification(`推送${res ? '成功' : '失败'}!`);
+        // 通知
+        notify({ title: '推送提示', message: `推送${res ? '成功' : '失败'}!` });
       }
     }
   };
@@ -1118,11 +1258,13 @@ function StudyItem() {
         // 远程推送
         if (settings[SettingType.REMOTE_PUSH]) {
           if (!userInfo.value) {
-            notification('用户信息不存在!');
+            // 通知
+            notify({ title: '推送提示', message: '用户信息不存在!' });
             return;
           }
           if (!pushToken.value) {
-            notification('推送 token 不存在!');
+            // 通知
+            notify({ title: '推送提示', message: '推送 token 不存在!' });
             return;
           }
           // 学习完成
@@ -1150,7 +1292,11 @@ function StudyItem() {
             },
             pushToken.value
           );
-          notification(`推送${res ? '成功' : '失败'}!`);
+          // 通知
+          notify({
+            title: '推送提示',
+            message: `推送${res ? '成功' : '失败'}!`,
+          });
         }
       },
     }

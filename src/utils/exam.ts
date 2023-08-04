@@ -117,11 +117,11 @@ function getNext() {
  * @description 获取滑动验证状态
  * @returns
  */
-function getSlideVerifyStatus() {
+async function getSlideVerifyStatus() {
   // 滑动验证
   const mask = $$<HTMLElement>('#nc_mask')[0];
   // 显示状态
-  const status = !!mask && getComputedStyle(mask).display !== 'none';
+  const status = !!(mask && getComputedStyle(mask).display !== 'none');
   if (status) {
     // 提高层级
     mask.style.zIndex = '999';

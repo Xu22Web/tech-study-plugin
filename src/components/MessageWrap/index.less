@@ -1,0 +1,77 @@
+.egg_message_wrap {
+  position: fixed;
+  width: 100%;
+  height: fit-content;
+  max-height: 100%;
+  left: 0;
+  top: 0;
+  overflow: auto;
+  font-size: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  transition: 0.3s ease;
+  z-index: 999;
+  .egg_message_item_wrap {
+    padding: 1rem;
+    transition: 0.3s ease;
+    transform: translateX(-100%);
+    &.active {
+      transform: translateX(0);
+    }
+    .egg_message_item {
+      background: #ffffff50;
+      padding: 1rem;
+      box-shadow: 0 0 0.2rem 0.2rem #ddd;
+      border-radius: 0.5rem;
+      backdrop-filter: blur(0.5rem);
+      .egg_message_head_wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        .egg_message_head {
+          font-weight: bold;
+          display: flex;
+          align-items: center;
+          &.info {
+            display: flex;
+            align-items: center;
+            .egg_icon {
+              color: #1890ff;
+            }
+          }
+          &.warn {
+            .egg_icon {
+              color: #faad14;
+            }
+          }
+          &.success {
+            .egg_icon {
+              color: #52c41a;
+            }
+          }
+          &.fail {
+            .egg_icon {
+              color: #ff4d4f;
+            }
+          }
+          .egg_icon {
+            font-size: 1.8rem;
+          }
+          .egg_message_title {
+            padding-left: 0.5rem;
+          }
+        }
+        .egg_message_head_extra {
+          padding: 0.5rem;
+          .egg_icon {
+            font-size: 1rem;
+            color: #999;
+          }
+        }
+      }
+      .egg_message_content {
+        padding: 0.5rem 0;
+      }
+    }
+  }
+}

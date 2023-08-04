@@ -18,7 +18,7 @@ const checkAllPermissions = () => {
     'debugger',
     'contextMenus',
   ];
-  permisstions.forEach((permission) => {
+  permisstions.filter((permission) => {
     // 是否支持
     const isSupport = checkPermissiomSupport(permission);
     if (!isSupport) {
@@ -27,6 +27,7 @@ const checkAllPermissions = () => {
       // 通知
       notification(`权限: ${permission} 不支持!`);
     }
+    return isSupport;
   });
 };
 
@@ -48,6 +49,7 @@ const openPanel = async () => {
     const [tab] = await chrome.tabs.query({
       url,
     });
+    console.log('url', url, tab);
     if (tab) {
       log('已存在任务面板!');
       winId = tab.windowId;

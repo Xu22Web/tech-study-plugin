@@ -257,7 +257,7 @@ const unref = <T>(val: T) => {
  * @param v
  * @returns
  */
-const ref = <T>(value: T): Ref<UnwrapRef<T>> => {
+const ref = <T>(value: T | Ref<T>): Ref<UnwrapRef<T>> => {
   return isRef<UnwrapRef<T>>(value)
     ? value
     : createRef(<UnwrapRef<T>>value, true);

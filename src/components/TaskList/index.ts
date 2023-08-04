@@ -1,6 +1,5 @@
 import { TaskType } from '../../enum';
 import store from '../../store';
-import { notification } from '../../utils/chromeUtils';
 import { watchEffect, watchEffectRef } from '../../utils/composition';
 import { createElementNode } from '../../utils/element';
 import { setValue } from '../../utils/storage';
@@ -10,7 +9,7 @@ import './index.less';
 
 function TaskList() {
   // 存储
-  const { taskConfig, login } = store;
+  const { taskConfig, login, notify } = store;
   // 处理任务设置变化
   const handleTaskChange = (e: Event, type: TaskType, title: string) => {
     // 开关
@@ -20,7 +19,11 @@ function TaskList() {
       // 本地存储
       setValue('taskConfig', taskConfig);
       // 通知
-      notification(`${title} ${checked ? '打开' : '关闭'}`);
+      notify({
+        id: title,
+        title: '任务设置',
+        message: `${title} ${checked ? '打开' : '关闭'}`,
+      });
     }
   };
   return createElementNode(

@@ -2,7 +2,7 @@
     "author": "xu22web",
     "name": "tech-study-plugin",
     "description": "A browser plugin helps you study joyfully on xuexi.com.",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "manifest_version": 3,
     "background": {
         "service_worker": "./dist/background/index.js"

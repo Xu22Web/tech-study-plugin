@@ -1,7 +1,6 @@
 import { SettingType } from '../../enum';
 import useCurrentWindow from '../../hooks/useWindow';
 import store from '../../store';
-import { notification } from '../../utils/chromeUtils';
 import { ref, watchEffectRef } from '../../utils/composition';
 import { createElementNode, createTextNode } from '../../utils/element';
 import { createMessageListeners, sendMessage } from '../../utils/message';
@@ -14,7 +13,7 @@ import './index.less';
  */
 function LoginItem() {
   // 存储
-  const { login, tabId, settings, pushToken } = store;
+  const { login, tabId, settings, pushToken, notify } = store;
   // 二维码显示
   const loginQRCodeShow = ref(false);
   // 二维码
@@ -95,7 +94,8 @@ function LoginItem() {
             if (settings[SettingType.REMOTE_PUSH]) {
               // 检查 token
               if (!pushToken.value) {
-                notification('推送 token 不存在!');
+                // 通知
+                notify({ title: '推送提示', message: '推送 token 不存在!' });
                 return;
               }
               // 链接
@@ -111,7 +111,11 @@ function LoginItem() {
                 },
                 pushToken.value
               );
-              notification(`推送${res ? '成功' : '失败'}!`);
+              // 通知
+              notify({
+                title: '推送提示',
+                message: `推送${res ? '成功' : '失败'}!`,
+              });
             }
           }
         );

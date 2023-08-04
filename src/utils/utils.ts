@@ -45,7 +45,7 @@ function sleep(time: number) {
  */
 function createCountDown(
   duration: number = 0,
-  callback?: (count: number) => void
+  callback?: (count: number, revoked: boolean) => void
 ) {
   // 总时长
   let count = duration;
@@ -58,6 +58,8 @@ function createCountDown(
       return new Promise((resolve) => {
         // 定时器
         timer = setInterval(async () => {
+          // 设置回调
+          callback && (await callback(count, revoked));
           // 撤销定时
           if (revoked) {
             // 清除定时器
@@ -65,8 +67,6 @@ function createCountDown(
             resolve(undefined);
             return;
           }
-          // 设置回调
-          callback && (await callback(count));
           if (count <= 0) {
             // 清除定时器
             clearInterval(timer);
@@ -143,6 +143,23 @@ function initLogo() {
   );
 }
 
+/**
+ * @description 随机 id
+ * @param length
+ * @returns
+ */
+function randomId(length: number) {
+  // 随机字符
+  const randStr = Math.random()
+    .toString(32)
+    .slice(2, length)
+    .padEnd(length, '0');
+  if (length <= 8) {
+    return randStr;
+  }
+  return `${randStr}${randomId(length - 8)}`;
+}
+
 export {
   boxModelToBounds,
   createCountDown,
@@ -150,4 +167,5 @@ export {
   initLogo,
   sleep,
   waitCondition,
+  randomId,
 };

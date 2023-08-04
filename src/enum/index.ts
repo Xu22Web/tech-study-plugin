@@ -2,8 +2,6 @@
  * @description 设置类型
  */
 export enum SettingType {
-  AUTO_START,
-  SCHEDULE_RUN,
   VIDEO_MUTED,
   RANDOM_EXAM,
   AUTO_ANSWER,

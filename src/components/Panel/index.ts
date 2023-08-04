@@ -3,7 +3,7 @@ import { SettingType } from '../../enum';
 import useCurrentWindow from '../../hooks/useWindow';
 import store from '../../store';
 import { Settings, TaskConfig } from '../../types';
-import { notification, onTabRemoved } from '../../utils/chromeUtils';
+import { onTabRemoved } from '../../utils/chromeUtils';
 import { ref, watchEffectRef, watchRef } from '../../utils/composition';
 import { createElementNode, createTextNode } from '../../utils/element';
 import { log } from '../../utils/log';
@@ -18,7 +18,6 @@ import { debounce } from '../../utils/utils';
 import Hr from '../Hr';
 import Icon from '../Icon';
 import LoginItem from '../LoginItem';
-import MessageItem from '../MessageItem';
 import NormalItem from '../Normalltem';
 import ScoreItem from '../ScoreItem';
 import SettingsPanel from '../SettingsPanel';
@@ -41,19 +40,10 @@ async function Panel() {
     maxRead,
     maxWatch,
     pushToken,
+    notify,
   } = store;
   // 运行设置标签
   const runLabels = [
-    {
-      title: '自动开始',
-      tip: '启动时, 自动开始任务, 在倒计时结束前自动开始可随时取消; 如果在自动开始前手动开始任务, 此次自动开始将取消',
-      type: SettingType.AUTO_START,
-    },
-    {
-      title: '定时刷新',
-      tip: '定时刷新页面，重新进行任务，此功能需要长时间占用浏览器',
-      type: SettingType.SCHEDULE_RUN,
-    },
     {
       title: '视频静音',
       tip: '视听学习时，静音播放视频',
@@ -92,7 +82,11 @@ async function Panel() {
       // 本地存储
       setValue('settings', settings);
       // 通知
-      notification(`${title} ${checked ? '打开' : '关闭'}`);
+      notify({
+        id: title,
+        title: '设置',
+        message: `${title} ${checked ? '打开' : '关闭'}`,
+      });
     }
   };
   // 初始化任务配置
@@ -227,7 +221,7 @@ async function Panel() {
 
       log('已连接!');
       // 通知
-      notification('已连接!');
+      notify({ title: '连接提示', message: '已连接!' });
       // tabId
       const { id } = sender.tab;
       // 设置tabId
@@ -265,7 +259,7 @@ async function Panel() {
   const handleDisconnect = async () => {
     log('被动断开连接!');
     // 通知
-    notification('已断开连接!');
+    notify({ title: '连接提示', message: '已断开连接!' });
     // 重置
     tabId.value = 0;
     // 重置登录状态
@@ -446,21 +440,22 @@ async function Panel() {
         () => [tabId.value, login.value],
         () => (tabId.value && login.value ? StudyItem() : undefined)
       ),
-      // 消息
-      MessageItem(),
       // 设置面板
       SettingsPanel({ settingsShow, settings, themeColor }),
-      createElementNode(
-        'div',
-        undefined,
-        { class: 'egg_back_item' },
+      createElementNode('div', undefined, { class: 'egg_footer_item' }, [
         Icon({
           viewBox: '0 0 762 52.917',
           paths: [
             'M0 0c22.863 0 40.637 25.93 63.5 25.93S104.137 0 127 0s40.637 25.93 63.5 25.93S231.137 0 254 0s40.637 25.93 63.5 25.93S358.137 0 381 0s40.637 25.93 63.5 25.93S485.137 0 508 0s40.637 25.93 63.5 25.93S612.137 0 635 0s40.637 25.93 63.5 25.93S739.137 0 762 0v52.917H0z',
           ],
-        })
-      ),
+        }),
+        Icon({
+          viewBox: '0 0 762 52.917',
+          paths: [
+            'M0 0c22.863 0 40.637 25.93 63.5 25.93S104.137 0 127 0s40.637 25.93 63.5 25.93S231.137 0 254 0s40.637 25.93 63.5 25.93S358.137 0 381 0s40.637 25.93 63.5 25.93S485.137 0 508 0s40.637 25.93 63.5 25.93S612.137 0 635 0s40.637 25.93 63.5 25.93S739.137 0 762 0v52.917H0z',
+          ],
+        }),
+      ]),
     ]
   );
 }

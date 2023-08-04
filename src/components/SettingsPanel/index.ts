@@ -2,18 +2,12 @@ import PLUGIN_CONFIG from '../../config/plugin';
 import { SettingType } from '../../enum';
 import store from '../../store';
 import { Settings } from '../../types';
-import { notification } from '../../utils/chromeUtils';
-import { Reactive, Ref, ref, watchEffectRef } from '../../utils/composition';
-import {
-  createElementNode,
-  createNSElementNode,
-  createTextNode,
-} from '../../utils/element';
+import { Reactive, Ref, watchEffectRef } from '../../utils/composition';
+import { createElementNode, createTextNode } from '../../utils/element';
 import { setValue } from '../../utils/storage';
 import { debounce } from '../../utils/utils';
 import Icon from '../Icon';
 import Select from '../Select';
-import TimeInput from '../TimeInput';
 import './index.less';
 
 function SettingsPanel({
@@ -77,21 +71,9 @@ function SettingsPanel({
     },
   ];
   // 存储
-  const { maxRead, maxWatch, pushToken } = store;
+  const { maxRead, maxWatch, pushToken, notify } = store;
   // token input
   const tokenInput = watchEffectRef(() => pushToken.value || null);
-  // 小时
-  const hour = ref(-1);
-  // 分钟
-  const minute = ref(-1);
-  //
-  // const scheduleList = reactive<
-  //   {
-  //     hour: number;
-  //     minute: number;
-  //     time: string;
-  //   }[]
-  // >([]);
   return createElementNode(
     'div',
     undefined,
@@ -233,7 +215,10 @@ function SettingsPanel({
                         // 存储
                         setValue('themeColor', themeColor);
                         // 通知
-                        notification(`主题色已保存为${color.title}`);
+                        notify({
+                          title: '主题设置',
+                          message: `主题色已保存为${color.title}`,
+                        });
                       }
                     }, 300),
                   })
@@ -283,7 +268,10 @@ function SettingsPanel({
                 // 存储
                 setValue('maxRead', maxRead);
                 // 通知
-                notification(`最大文章选读时间改为${value}s`);
+                notify({
+                  title: '时间设置',
+                  message: `最大文章选读时间改为${value}s`,
+                });
               },
             }),
           ]
@@ -333,7 +321,10 @@ function SettingsPanel({
                 // 存储
                 setValue('maxWatch', maxWatch);
                 // 通知
-                notification(`最大视听学习时间改为${value}s`);
+                notify({
+                  title: '时间设置',
+                  message: `最大视听学习时间改为${value}s`,
+                });
               },
             }),
           ]
@@ -391,7 +382,10 @@ function SettingsPanel({
                                     // 本地存储
                                     setValue('pushToken', pushToken);
                                     // 通知
-                                    notification('token 保存成功!');
+                                    notify({
+                                      title: '推送设置',
+                                      message: 'token 保存成功!',
+                                    });
                                   }
                                   return;
                                 }
@@ -402,13 +396,19 @@ function SettingsPanel({
                                   // 本地存储
                                   setValue('pushToken', pushToken);
                                   // 通知
-                                  notification('token 删除成功!');
+                                  notify({
+                                    title: '推送设置',
+                                    message: 'token 删除成功!',
+                                  });
                                   return;
                                 }
                                 // 设置正确值
                                 tokenInput.value = pushToken.value;
                                 // 通知
-                                notification('token 有误!');
+                                notify({
+                                  title: '推送设置',
+                                  message: 'token 有误!',
+                                });
                               }
                             },
                           }
@@ -418,119 +418,6 @@ function SettingsPanel({
                   ),
                 ]
               )
-            : undefined
-        ),
-        watchEffectRef(() =>
-          settings[SettingType.SCHEDULE_RUN]
-            ? createElementNode('div', undefined, { class: 'egg_schedule' }, [
-                createElementNode(
-                  'div',
-                  undefined,
-                  { class: 'egg_schedule_time_wrap' },
-                  [
-                    createElementNode(
-                      'div',
-                      undefined,
-                      { class: 'egg_schedule_time' },
-                      [
-                        createElementNode(
-                          'div',
-                          undefined,
-                          { class: 'egg_schedule_label' },
-                          createTextNode('设置时间')
-                        ),
-                        createElementNode(
-                          'div',
-                          undefined,
-                          { class: 'egg_schedule_time_input_wrap' },
-                          [
-                            TimeInput({
-                              hour,
-                              minute,
-                              onchange({ hour: h, minute: min }) {
-                                hour.value = h;
-                                minute.value = min;
-                              },
-                            }),
-                            createElementNode(
-                              'button',
-                              undefined,
-                              {
-                                class: 'egg_schedule_add_btn',
-                                onclick: debounce(() => {
-                                  //   // 定时刷新
-                                  //   if (!settings[SettingType.SCHEDULE_RUN]) {
-                                  //     createTip('未开启定时刷新!');
-                                  //     return;
-                                  //   }
-                                  //   if (
-                                  //     hour.value === -1 ||
-                                  //     minute.value === -1
-                                  //   ) {
-                                  //     createTip('时间格式不符合要求!');
-                                  //     return;
-                                  //   }
-                                  //   // 重复定时存在
-                                  //   const exists = scheduleList.find(
-                                  //     (schedule) =>
-                                  //       schedule.hour === hour.value &&
-                                  //       schedule.minute === minute.value
-                                  //   );
-                                  //   if (exists) {
-                                  //     createTip('设置定时任务重复!');
-                                  //     return;
-                                  //   }
-                                  //   createTip('设置定时任务成功!');
-                                  //   // 添加
-                                  //   scheduleList.push({
-                                  //     hour: hour.value,
-                                  //     minute: minute.value,
-                                  //     time: `${formatDateNum(
-                                  //       hour.value
-                                  //     )}:${formatDateNum(minute.value)}`,
-                                  //   });
-                                  //   // 排序
-                                  //   scheduleList.sort((a, b) =>
-                                  //     a.hour === b.hour
-                                  //       ? a.minute - b.minute
-                                  //       : a.hour - b.hour
-                                  //   );
-                                  //   // 存储
-                                  //   GM_setValue(
-                                  //     'scheduleList',
-                                  //     JSON.stringify(scheduleList)
-                                  //   );
-                                  //   // 清空
-                                  //   hour.value = -1;
-                                  //   minute.value = -1;
-                                  //   const inputs = $$<HTMLInputElement>(
-                                  //     '.egg_time_input input'
-                                  //   );
-                                  //   inputs.forEach((i) => (i.value = ''));
-                                  // 刷新任务
-                                  //   refreshScheduleTask();
-                                }, 300),
-                              },
-                              createNSElementNode(
-                                'svg',
-                                undefined,
-                                {
-                                  viewBox: '0 0 1024 1024',
-                                  class: 'egg_icon',
-                                },
-                                createNSElementNode('path', undefined, {
-                                  d: 'M801.171 483.589H544V226.418c0-17.673-14.327-32-32-32s-32 14.327-32 32v257.171H222.83c-17.673 0-32 14.327-32 32s14.327 32 32 32H480v257.17c0 17.673 14.327 32 32 32s32-14.327 32-32v-257.17h257.171c17.673 0 32-14.327 32-32s-14.327-32-32-32z',
-                                })
-                              )
-                            ),
-                          ]
-                        ),
-                      ]
-                    ),
-                  ]
-                ),
-                // ScheduleList(),
-              ])
             : undefined
         ),
       ]),

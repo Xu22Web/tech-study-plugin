@@ -1,6 +1,7 @@
 import { UserInfo } from '../api/user';
 import { TaskType } from '../enum';
 import { Settings, TaskConfig } from '../types';
+import { NotifyOptions, createNotification } from '../utils/chromeUtils';
 import { Reactive, Ref, reactive, ref } from '../utils/composition';
 
 interface Store {
@@ -56,7 +57,13 @@ interface Store {
    * @description 用户信息
    */
   userInfo: Ref<UserInfo | null>;
+  /**
+   * @description 通知
+   */
+  notify: (options: NotifyOptions) => void;
 }
+// 通知
+const { notify } = createNotification();
 
 /**
  * @description 存储
@@ -65,16 +72,7 @@ const store: Store = {
   tabId: ref(0),
   login: ref(false),
   themeColor: ref('#fa3333'),
-  settings: reactive<Settings>([
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-  ]),
+  settings: reactive<Settings>([false, false, false, false]),
   taskConfig: reactive<TaskConfig>([
     {
       title: '登录',
@@ -129,6 +127,7 @@ const store: Store = {
   message: ref(''),
   pushToken: ref(''),
   userInfo: ref(null),
+  notify,
 };
 
 export default store;

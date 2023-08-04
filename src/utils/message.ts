@@ -1,3 +1,5 @@
+import { randomId } from './utils';
+
 /**
  * @description 发送消息
  * @param action
@@ -90,7 +92,7 @@ function createMessageListeners() {
       }
     ) {
       // 生成id
-      const id = Math.random().toString(16).substring(2);
+      const id = randomId(8);
       listeners.push({
         id,
         action,
